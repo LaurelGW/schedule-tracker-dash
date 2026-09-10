@@ -43,22 +43,23 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a2332;fo
 
 /* slot grid: 9 slots = 3 AM cols + noon + 4 PM cols, displayed as mini blocks */
 .slot-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:2px;margin-bottom:4px;}
-.slot-block{height:7px;border-radius:2px;}
+.slot-block{height:22px;border-radius:2px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:2px;}
+.slot-time-lbl{font-size:0.42rem;color:rgba(255,255,255,0.85);font-weight:700;line-height:1;text-align:center;letter-spacing:-0.01em;}
 .slot-filled   {background:#22c55e;}
 .slot-available{background:#fbbf24;}
-.slot-pto      {background:#94a3b8;}
-.slot-traveling{background:#818cf8;}
-.slot-none     {background:#e2e8f0;}
+.slot-pto      {background:#7c3aed;}
+.slot-traveling{background:#7c3aed;}
+.slot-none     {background:#ef4444;}
 
 .loc-tag{font-size:0.6rem;font-weight:600;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
 .loc-tag.split{color:#8b5cf6;}
 .day-status-lbl{font-size:0.62rem;font-weight:700;text-align:center;padding:2px 0;}
 .status-pto   {color:#64748b;}
-.status-avail {color:#d97706;}
+.status-avail {color:#ea580c;}
 .status-full  {color:#16a34a;}
 .status-none  {color:#cbd5e1;}
 .status-travel{color:#6366f1;}
-.avail-count  {font-size:0.68rem;font-weight:800;color:#d97706;}
+.avail-count  {font-size:0.68rem;font-weight:800;color:#ea580c;}
 
 /* ── LOCATION VIEW ── */
 .loc-card{background:white;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.07);margin-bottom:14px;overflow:hidden;}
@@ -73,9 +74,9 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a2332;fo
 .mini-slots{display:flex;gap:2px;align-items:center;}
 .mini-s{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
 .chip{display:inline-block;padding:2px 7px;border-radius:8px;font-size:0.65rem;font-weight:700;}
-.chip-avail {background:#fef3c7;color:#92400e;}
+.chip-avail {background:#ffedd5;color:#c2410c;}
 .chip-full  {background:#dcfce7;color:#15803d;}
-.chip-pto   {background:#f1f5f9;color:#64748b;}
+.chip-pto   {background:#ede9fe;color:#5b21b6;}
 .chip-travel{background:#ede9fe;color:#5b21b6;}
 
 /* ── HEATMAP ── */
@@ -90,8 +91,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a2332;fo
 .hm-4  {background:#fcd34d;color:#451a03;}
 .hm-5p {background:#f59e0b;color:white;}
 .hm-full{background:#dcfce7;color:#15803d;}
-.hm-pto {background:#f1f5f9;color:#94a3b8;font-size:0.55rem;}
-.hm-none{background:#fafafa;color:#e2e8f0;}
+.hm-pto {background:#ede9fe;color:#5b21b6;font-size:0.55rem;}
+.hm-none{background:#fee2e2;color:#b91c1c;}
 .hm-row-lbl{padding:6px 10px;font-size:0.72rem;font-weight:600;background:#fafbfc;border:1px solid #e2e8f0;white-space:nowrap;text-align:left;}
 
 /* ── LEGEND ── */
@@ -137,10 +138,9 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a2332;fo
   </div>
   <div class="legend">
     <div class="leg"><div class="leg-sq" style="background:#22c55e"></div>Filled</div>
-    <div class="leg"><div class="leg-sq" style="background:#fbbf24"></div>Available</div>
-    <div class="leg"><div class="leg-sq" style="background:#94a3b8"></div>PTO / Holiday</div>
-    <div class="leg"><div class="leg-sq" style="background:#818cf8"></div>Traveling</div>
-    <div class="leg"><div class="leg-sq" style="background:#e2e8f0"></div>No Schedule</div>
+    <div class="leg"><div class="leg-sq" style="background:#f97316"></div>Available</div>
+    <div class="leg"><div class="leg-sq" style="background:#7c3aed"></div>PTO / Traveling</div>
+    <div class="leg"><div class="leg-sq" style="background:#ef4444"></div>No Schedule</div>
   </div>
   <div id="provider-content"></div>
 </div>
@@ -221,7 +221,7 @@ var ROLES = {
 var PROV_ORDER = ['Darin White','John Lugo','Timothy Dau','Colby Kunkel','Evan Kern','Daniel Trapp',
                   'Benjamin Wynn','Marshall Lassiter','Drayton Perkins','Jedd Thorderson','Karah Loftin'];
 
-function slotColor(s){ return s==='filled'?'#22c55e':s==='available'?'#fbbf24':s==='pto'?'#94a3b8':s==='traveling'?'#818cf8':'#e2e8f0'; }
+function slotColor(s){ return s==='filled'?'#22c55e':s==='available'?'#f97316':s==='pto'?'#7c3aed':s==='traveling'?'#7c3aed':'#ef4444'; }
 
 // ── WEEK TABS ──────────────────────────────────────────────────────────────
 function buildWeekTabs(containerId, onChange) {
@@ -284,7 +284,7 @@ function renderProvider(){
     rows.forEach(function(r){ if(!byWeek[r.week])byWeek[r.week]=[]; byWeek[r.week].push(r); });
 
     html+='<div class="prov-section">';
-    html+='<div class="prov-hdr"><div><div class="prov-hdr-name">'+prov+'</div><div class="prov-hdr-role">'+(ROLES[prov]||'')+'</div></div>';
+    html+='<div class="prov-hdr"><div><div class="prov-hdr-name">'+prov+'</div></div>';
     html+='<div class="prov-hdr-avail">'+ta+' open slots &nbsp;·&nbsp; '+tf+' filled</div></div>';
 
     Object.keys(byWeek).sort().forEach(function(wk){
@@ -302,17 +302,17 @@ function renderProvider(){
           html+='<div class="day-status-lbl status-none" style="font-size:0.58rem;margin-top:10px">—</div>';
         } else if(r.pto){
           html+='<div class="slot-grid">';
-          for(var i=0;i<9;i++) html+='<div class="slot-block" style="background:#94a3b8"></div>';
+          for(var i=0;i<9;i++) html+='<div class="slot-block" style="background:#7c3aed"><span class="slot-time-lbl">'+SLOT_TIMES[i].split('–')[0]+'</span></div>';
           html+='</div><div class="day-status-lbl status-pto">PTO</div>';
         } else if(r.no_sched && !(r.loc_am)){
           html+='<div class="slot-grid">';
-          for(var i=0;i<9;i++) html+='<div class="slot-block" style="background:#e2e8f0"></div>';
+          for(var i=0;i<9;i++) html+='<div class="slot-block" style="background:#ef4444"><span class="slot-time-lbl">'+SLOT_TIMES[i].split('–')[0]+'</span></div>';
           html+='</div><div class="day-status-lbl status-none">No Sched</div>';
         } else {
           var avail=r.slots.filter(function(s){return s==='available';}).length;
           html+='<div class="slot-grid">';
           r.slots.forEach(function(s,si){
-            html+='<div class="slot-block" style="background:'+slotColor(s)+'" onmouseenter="showTip(event,\''+prov+'\',\''+r.day+'\',\''+wlbl+'\','+JSON.stringify(r.slots)+')" onmouseleave="hideTip()"></div>';
+            html+='<div class="slot-block" style="background:'+slotColor(s)+'" onmouseenter="showTip(event,\''+prov+'\',\''+r.day+'\',\''+wlbl+'\','+JSON.stringify(r.slots)+')" onmouseleave="hideTip()"><span class="slot-time-lbl">'+SLOT_TIMES[si].split('–')[0]+'</span></div>';
           });
           html+='</div>';
           // location tags
@@ -418,7 +418,7 @@ function renderHeatmap(){
   html+='</tr></thead><tbody>';
 
   PROV_ORDER.forEach(function(prov){
-    html+='<tr><td class="hm-row-lbl">'+prov+'<br><span style="font-size:0.6rem;color:#94a3b8;font-weight:400">'+(ROLES[prov]||'')+'</span></td>';
+    html+='<tr><td class="hm-row-lbl">'+prov+'</td>';
     colKeys.forEach(function(c){
       var r=lookup[prov+'|'+c.week+'|'+c.day];
       if(!r){html+='<td class="hm-none">—</td>';return;}
@@ -438,8 +438,8 @@ function renderHeatmap(){
   html+='<div class="leg"><div class="leg-sq" style="background:#fef9c3;border:1px solid #e2e8f0;width:20px;height:12px;border-radius:3px"></div>1–2 Open</div>';
   html+='<div class="leg"><div class="leg-sq" style="background:#fde68a;border:1px solid #e2e8f0;width:20px;height:12px;border-radius:3px"></div>3–4 Open</div>';
   html+='<div class="leg"><div class="leg-sq" style="background:#f59e0b;width:20px;height:12px;border-radius:3px"></div>5+ Open</div>';
-  html+='<div class="leg"><div class="leg-sq hm-pto" style="width:20px;height:12px;border-radius:3px;background:#f1f5f9;border:1px solid #e2e8f0"></div>PTO / Holiday</div>';
-  html+='<div class="leg"><div class="leg-sq hm-none" style="width:20px;height:12px;border-radius:3px;background:#fafafa;border:1px solid #e2e8f0"></div>Not Scheduled</div>';
+  html+='<div class="leg"><div class="leg-sq hm-pto" style="width:20px;height:12px;border-radius:3px;background:#ede9fe"></div>PTO / Holiday / Traveling</div>';
+  html+='<div class="leg"><div class="leg-sq hm-none" style="width:20px;height:12px;border-radius:3px;background:#fee2e2"></div>No Schedule</div>';
   html+='</div>';
   document.getElementById('heatmap-content').innerHTML=html;
 }
