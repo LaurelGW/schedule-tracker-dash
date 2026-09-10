@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>EMG Solutions — September 2026 Schedule Availability</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a2332;font-size:13px;}
+
+.header{background:linear-gradient(135deg,#1a3a5c 0%,#2d6a9f 100%);color:white;padding:16px 24px;display:flex;align-items:center;gap:12px;}
+.logo{width:40px;height:40px;background:rgba(255,255,255,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1rem;flex-shrink:0;}
+.header h1{font-size:1.1rem;font-weight:700;}
+.header p{font-size:0.72rem;opacity:0.8;margin-top:2px;}
+.hdr-pills{margin-left:auto;display:flex;gap:8px;flex-shrink:0;}
+.hdr-pill{background:rgba(255,255,255,0.15);border-radius:6px;padding:5px 11px;font-size:0.7rem;text-align:center;}
+.hdr-pill b{display:block;font-size:1.1rem;font-weight:800;}
+
+.tabs{display:flex;background:white;border-bottom:2px solid #e2e8f0;padding:0 20px;gap:4px;}
+.tab{padding:11px 18px;font-size:0.8rem;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;color:#64748b;transition:all 0.2s;white-space:nowrap;}
+.tab.active{border-bottom-color:#2d6a9f;color:#2d6a9f;}
+
+.content{padding:18px 20px;max-height:calc(100vh - 120px);overflow-y:auto;}
+
+/* ── CONTROLS ── */
+.controls{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+.controls select,.controls input{padding:5px 10px;border-radius:7px;border:1.5px solid #e2e8f0;font-size:0.75rem;outline:none;background:white;}
+.controls select:focus,.controls input:focus{border-color:#2d6a9f;}
+.week-tabs{display:flex;gap:4px;}
+.week-btn{padding:5px 12px;border-radius:6px;border:1.5px solid #e2e8f0;background:white;font-size:0.72rem;font-weight:600;cursor:pointer;color:#64748b;}
+.week-btn.active{background:#2d6a9f;border-color:#2d6a9f;color:white;}
+
+/* ── PROVIDER CALENDAR VIEW ── */
+.prov-section{margin-bottom:20px;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+.prov-hdr{background:linear-gradient(135deg,#1a3a5c,#2d6a9f);color:white;padding:10px 14px;display:flex;align-items:center;gap:10px;}
+.prov-hdr-name{font-weight:700;font-size:0.9rem;}
+.prov-hdr-role{font-size:0.68rem;opacity:0.75;}
+.prov-hdr-avail{margin-left:auto;font-size:0.7rem;opacity:0.9;}
+.prov-week-row{background:white;display:grid;grid-template-columns:100px repeat(5,1fr);border-bottom:1px solid #f1f5f9;}
+.prov-week-row:last-child{border-bottom:none;}
+.week-lbl{padding:8px 10px;font-size:0.68rem;font-weight:700;color:#94a3b8;display:flex;align-items:center;border-right:1px solid #f1f5f9;background:#fafbfc;}
+.day-col{padding:6px 8px;border-right:1px solid #f1f5f9;min-height:72px;}
+.day-col:last-child{border-right:none;}
+
+/* slot grid: 9 slots = 3 AM cols + noon + 4 PM cols, displayed as mini blocks */
+.slot-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:2px;margin-bottom:4px;}
+.slot-block{height:7px;border-radius:2px;}
+.slot-filled   {background:#22c55e;}
+.slot-available{background:#fbbf24;}
+.slot-pto      {background:#94a3b8;}
+.slot-traveling{background:#818cf8;}
+.slot-none     {background:#e2e8f0;}
+
+.loc-tag{font-size:0.6rem;font-weight:600;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.loc-tag.split{color:#8b5cf6;}
+.day-status-lbl{font-size:0.62rem;font-weight:700;text-align:center;padding:2px 0;}
+.status-pto   {color:#64748b;}
+.status-avail {color:#d97706;}
+.status-full  {color:#16a34a;}
+.status-none  {color:#cbd5e1;}
+.status-travel{color:#6366f1;}
+.avail-count  {font-size:0.68rem;font-weight:800;color:#d97706;}
+
+/* ── LOCATION VIEW ── */
+.loc-card{background:white;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.07);margin-bottom:14px;overflow:hidden;}
+.loc-card-hdr{background:#1a3a5c;color:white;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;}
+.loc-card-name{font-weight:700;font-size:0.88rem;}
+.loc-card-sub{font-size:0.68rem;opacity:0.75;}
+.loc-table{width:100%;border-collapse:collapse;}
+.loc-table th{background:#f8fafc;padding:7px 10px;text-align:left;font-size:0.67rem;font-weight:700;text-transform:uppercase;color:#64748b;letter-spacing:0.04em;border-bottom:1px solid #e2e8f0;}
+.loc-table td{padding:7px 10px;border-bottom:1px solid #f1f5f9;font-size:0.75rem;vertical-align:middle;}
+.loc-table tr:last-child td{border-bottom:none;}
+.loc-table tr:hover td{background:#fafcff;}
+.mini-slots{display:flex;gap:2px;align-items:center;}
+.mini-s{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.chip{display:inline-block;padding:2px 7px;border-radius:8px;font-size:0.65rem;font-weight:700;}
+.chip-avail {background:#fef3c7;color:#92400e;}
+.chip-full  {background:#dcfce7;color:#15803d;}
+.chip-pto   {background:#f1f5f9;color:#64748b;}
+.chip-travel{background:#ede9fe;color:#5b21b6;}
+
+/* ── HEATMAP ── */
+.heatmap-wrap{overflow-x:auto;}
+.heatmap-table{border-collapse:collapse;white-space:nowrap;}
+.heatmap-table th{padding:6px 8px;font-size:0.65rem;font-weight:700;color:#64748b;text-transform:uppercase;background:#f8fafc;border:1px solid #e2e8f0;}
+.heatmap-table td{padding:0;border:1px solid #e2e8f0;width:60px;height:36px;text-align:center;font-size:0.7rem;font-weight:700;vertical-align:middle;cursor:default;}
+.hm-0  {background:#f1f5f9;color:#94a3b8;}
+.hm-1  {background:#fefce8;color:#854d0e;}
+.hm-2  {background:#fef9c3;color:#713f12;}
+.hm-3  {background:#fde68a;color:#78350f;}
+.hm-4  {background:#fcd34d;color:#451a03;}
+.hm-5p {background:#f59e0b;color:white;}
+.hm-full{background:#dcfce7;color:#15803d;}
+.hm-pto {background:#f1f5f9;color:#94a3b8;font-size:0.55rem;}
+.hm-none{background:#fafafa;color:#e2e8f0;}
+.hm-row-lbl{padding:6px 10px;font-size:0.72rem;font-weight:600;background:#fafbfc;border:1px solid #e2e8f0;white-space:nowrap;text-align:left;}
+
+/* ── LEGEND ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;padding:10px 0;font-size:0.7rem;align-items:center;}
+.leg{display:flex;align-items:center;gap:5px;}
+.leg-sq{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+
+.tip{position:fixed;background:#1e293b;color:white;padding:9px 13px;border-radius:8px;font-size:0.73rem;pointer-events:none;z-index:9999;display:none;max-width:280px;line-height:1.6;box-shadow:0 4px 16px rgba(0,0,0,0.3);}
+.hidden{display:none;}
+
+/* Availability bar */
+.avail-bar-wrap{height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin-top:2px;}
+.avail-bar{height:6px;border-radius:3px;background:#fbbf24;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">EMG</div>
+  <div>
+    <h1>EMG Solutions — September 2026 Schedule Availability</h1>
+    <p>Source: Proactive Schedule Tracker · 11 providers · 35 clinic locations</p>
+  </div>
+  <div class="hdr-pills">
+    <div class="hdr-pill"><b id="stat-avail-slots">—</b>Available Slots</div>
+    <div class="hdr-pill"><b id="stat-filled-slots">—</b>Filled Slots</div>
+    <div class="hdr-pill"><b id="stat-pct">—</b>Fill Rate</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('provider',this)">👤 By Provider</div>
+  <div class="tab" onclick="showTab('location',this)">📍 By Location</div>
+  <div class="tab" onclick="showTab('heatmap',this)">🔥 Availability Heatmap</div>
+</div>
+
+<!-- PROVIDER TAB -->
+<div id="tab-provider" class="content">
+  <div class="controls">
+    <div class="week-tabs" id="week-tabs"></div>
+    <select id="p-filter-prov" onchange="renderProvider()"><option value="">All Providers</option></select>
+    <input id="p-srch" placeholder="🔍 Search provider or location…" oninput="renderProvider()" style="width:220px;">
+  </div>
+  <div class="legend">
+    <div class="leg"><div class="leg-sq" style="background:#22c55e"></div>Filled</div>
+    <div class="leg"><div class="leg-sq" style="background:#fbbf24"></div>Available</div>
+    <div class="leg"><div class="leg-sq" style="background:#94a3b8"></div>PTO / Holiday</div>
+    <div class="leg"><div class="leg-sq" style="background:#818cf8"></div>Traveling</div>
+    <div class="leg"><div class="leg-sq" style="background:#e2e8f0"></div>No Schedule</div>
+  </div>
+  <div id="provider-content"></div>
+</div>
+
+<!-- LOCATION TAB -->
+<div id="tab-location" class="content hidden">
+  <div class="controls">
+    <div class="week-tabs" id="week-tabs-loc"></div>
+    <input id="l-srch" placeholder="🔍 Filter locations…" oninput="renderLocation()" style="width:220px;">
+  </div>
+  <div id="location-content"></div>
+</div>
+
+<!-- HEATMAP TAB -->
+<div id="tab-heatmap" class="content hidden">
+  <div class="controls">
+    <div class="week-tabs" id="week-tabs-hm"></div>
+    <span style="font-size:0.72rem;color:#64748b;margin-left:4px;">Cells show open appointment slots. Yellow = open, Green = fully booked, Gray = PTO/no schedule.</span>
+  </div>
+  <div class="heatmap-wrap" id="heatmap-content"></div>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script>
+var RAW = [{"provider":"Karah Loftin","week":"2026-09-14","day":"Monday","di":0,"loc_am":"RES-MCDONOUGH","loc_pm":"RES-MCDONOUGH","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"provider":"Karah Loftin","week":"2026-09-14","day":"Tuesday","di":1,"loc_am":"AHS-SMYRNA","loc_pm":"AHS-SMYRNA","pto":false,"traveling":false,"no_sched":false,"slots":["noScheduleNoSlot","available","filled","filled","filled","filled","available","available","available"]},{"provider":"Karah Loftin","week":"2026-09-14","day":"Wednesday","di":2,"loc_am":"AHS-JOHNS CREEK","loc_pm":"AHS-LAWRENCEVILLE","pto":false,"traveling":true,"no_sched":false,"slots":["available","available","available","available","traveling","filled","filled","filled","filled"]},{"provider":"Karah Loftin","week":"2026-09-14","day":"Thursday","di":3,"loc_am":"AHS-EAST COBB","loc_pm":"AHS-EAST COBB","pto":false,"traveling":false,"no_sched":false,"slots":["noScheduleNoSlot","filled","filled","available","available","available","available","available","available"]},{"provider":"Karah Loftin","week":"2026-09-14","day":"Friday","di":4,"loc_am":null,"loc_pm":null,"pto":true,"traveling":false,"no_sched":false,"slots":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]},{"provider":"Jedd Thorderson","week":"2026-09-14","day":"Monday","di":0,"loc_am":"BJISG","loc_pm":"BJISG","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"provider":"Jedd Thorderson","week":"2026-09-14","day":"Tuesday","di":1,"loc_am":"TOI-GAINESVILLE","loc_pm":"TOI-GAINESVILLE","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"provider":"Jedd Thorderson","week":"2026-09-14","day":"Wednesday","di":2,"loc_am":"TOI-OCALA","loc_pm":"TOI-OCALA","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"provider":"Jedd Thorderson","week":"2026-09-14","day":"Thursday","di":3,"loc_am":"TOI-GAINESVILLE","loc_pm":"TOI-GAINESVILLE","pto":false,"traveling":true,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","filled","filled","traveling"]},{"provider":"Jedd Thorderson","week":"2026-09-14","day":"Friday","di":4,"loc_am":"HC-VALDOSTA","loc_pm":"HC-VALDOSTA","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","available","available","available"]},{"provider":"Daniel Trapp","week":"2026-09-13","day":"Monday","di":0,"loc_am":"HC-STONECREST","loc_pm":"HC-STONECREST","pto":false,"traveling":false,"no_sched":false,"slots":["available","available","available","available","available","available","available","available","available"]},{"provider":"Daniel Trapp","week":"2026-09-13","day":"Tuesday","di":1,"loc_am":null,"loc_pm":null,"pto":false,"traveling":false,"no_sched":true,"slots":["noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot"]},{"provider":"Daniel Trapp","week":"2026-09-13","day":"Wednesday","di":2,"loc_am":"WTBJ-PARIS","loc_pm":"WTBJ-PARIS","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","available","filled","filled","filled","filled","filled"]},{"provider":"Daniel Trapp","week":"2026-09-13","day":"Thursday","di":3,"loc_am":"WTBJ-JACKSON","loc_pm":"WTBJ-JACKSON","pto":false,"traveling":false,"no_sched":false,"slots":["available","available","filled","available","available","available","available","filled","available"]},{"provider":"Daniel Trapp","week":"2026-09-13","day":"Friday","di":4,"loc_am":"HC-SKYLINE","loc_pm":"HC-SKYLINE","pto":false,"traveling":false,"no_sched":false,"slots":["available","available","available","filled","available","available","available","available","available"]},{"provider":"Colby Kunkel","week":"2026-09-07","day":"Monday","di":0,"loc_am":"Holiday","loc_pm":"Holiday","pto":true,"traveling":false,"no_sched":false,"slots":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]},{"provider":"Colby Kunkel","week":"2026-09-07","day":"Tuesday","di":1,"loc_am":"EMG-HVILLE","loc_pm":"EMG-HVILLE","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"provider":"Colby Kunkel","week":"2026-09-07","day":"Wednesday","di":2,"loc_am":"TOC-ATHENS","loc_pm":"TOC-ATHENS","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"provider":"Colby Kunkel","week":"2026-09-07","day":"Thursday","di":3,"loc_am":"TOC-ATHENS","loc_pm":"TOC-ATHENS","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"provider":"Colby Kunkel","week":"2026-09-07","day":"Friday","di":4,"loc_am":"TOC-ATHENS","loc_pm":"TOC-ATHENS","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"provider":"John Lugo","week":"2026-09-07","day":"Monday","di":0,"loc_am":"Holiday","loc_pm":"Holiday","pto":true,"traveling":false,"no_sched":false,"slots":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]},{"provider":"John Lugo","week":"2026-09-07","day":"Tuesday","di":1,"loc_am":"RMC","loc_pm":"RMC","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","filled","filled","noScheduleNoSlot"]},{"provider":"John Lugo","week":"2026-09-07","day":"Wednesday","di":2,"loc_am":"SBJS","loc_pm":"SBJS","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","filled","filled","noScheduleNoSlot"]},{"provider":"John Lugo","week":"2026-09-07","day":"Thursday","di":3,"loc_am":"SBJS","loc_pm":"SBJS","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","filled","filled","noScheduleNoSlot"]},{"provider":"John Lugo","week":"2026-09-07","day":"Friday","di":4,"loc_am":"Admin/Education","loc_pm":"Admin/Education","pto":false,"traveling":false,"no_sched":true,"slots":["noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot"]},{"provider":"Drayton Perkins","week":"2026-09-07","day":"Monday","di":0,"loc_am":"Holiday","loc_pm":"Holiday","pto":false,"traveling":false,"no_sched":true,"slots":["noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot"]},{"provider":"Drayton Perkins","week":"2026-09-07","day":"Tuesday","di":1,"loc_am":null,"loc_pm":null,"pto":true,"traveling":false,"no_sched":false,"slots":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]},{"provider":"Drayton Perkins","week":"2026-09-07","day":"Wednesday","di":2,"loc_am":null,"loc_pm":null,"pto":true,"traveling":false,"no_sched":false,"slots":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]},{"provider":"Drayton Perkins","week":"2026-09-07","day":"Thursday","di":3,"loc_am":null,"loc_pm":null,"pto":true,"traveling":false,"no_sched":false,"slots":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]},{"provider":"Drayton Perkins","week":"2026-09-07","day":"Friday","di":4,"loc_am":null,"loc_pm":null,"pto":true,"traveling":false,"no_sched":false,"slots":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]},{"provider":"Timothy Dau","week":"2026-09-07","day":"Monday","di":0,"loc_am":"Holiday","loc_pm":"Holiday","pto":false,"traveling":false,"no_sched":true,"slots":["noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot"]},{"provider":"Timothy Dau","week":"2026-09-07","day":"Tuesday","di":1,"loc_am":"EMERGE-ASHVILLE","loc_pm":"EMERGE-ASHVILLE","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"provider":"Timothy Dau","week":"2026-09-07","day":"Wednesday","di":2,"loc_am":"EMERGE-ASHVILLE","loc_pm":"EMERGE-ASHVILLE","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","available","available","available"]},{"provider":"Timothy Dau","week":"2026-09-07","day":"Thursday","di":3,"loc_am":"EMERGE-MORGANTON","loc_pm":"EMERGE-MORGANTON","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"provider":"Timothy Dau","week":"2026-09-07","day":"Friday","di":4,"loc_am":"EMERGE-ARDEN","loc_pm":"EMERGE-ARDEN","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"provider":"Marshall Lassiter","week":"2026-09-07","day":"Monday","di":0,"loc_am":"Holiday","loc_pm":"Holiday","pto":false,"traveling":false,"no_sched":true,"slots":["noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot"]},{"provider":"Marshall Lassiter","week":"2026-09-07","day":"Tuesday","di":1,"loc_am":"BBJ","loc_pm":"BBJ","pto":false,"traveling":false,"no_sched":false,"slots":["available","filled","available","filled","available","available","filled","available","available"]},{"provider":"Marshall Lassiter","week":"2026-09-07","day":"Wednesday","di":2,"loc_am":"HC-DOTHAN","loc_pm":"HC-DOTHAN","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","filled","available","available"]},{"provider":"Marshall Lassiter","week":"2026-09-07","day":"Thursday","di":3,"loc_am":"HC-DOTHAN","loc_pm":"HC-DOTHAN","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","available","available","available","available","available","available"]},{"provider":"Marshall Lassiter","week":"2026-09-07","day":"Friday","di":4,"loc_am":"CROTWELL","loc_pm":"CROTWELL","pto":false,"traveling":false,"no_sched":false,"slots":["available","filled","filled","filled","filled","filled","filled","available","available"]},{"provider":"Benjamin Wynn","week":"2026-09-07","day":"Monday","di":0,"loc_am":"Holiday","loc_pm":"Holiday","pto":false,"traveling":false,"no_sched":true,"slots":["noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot"]},{"provider":"Benjamin Wynn","week":"2026-09-07","day":"Tuesday","di":1,"loc_am":"HC-THOMASTON","loc_pm":"HC-THOMASTON","pto":false,"traveling":false,"no_sched":false,"slots":["available","filled","filled","available","noScheduleNoSlot","available","available","available","available"]},{"provider":"Benjamin Wynn","week":"2026-09-07","day":"Wednesday","di":2,"loc_am":"RES-AUSTELL","loc_pm":"RES-AUSTELL","pto":false,"traveling":false,"no_sched":false,"slots":["filled","available","available","available","available","filled","filled","filled","available"]},{"provider":"Benjamin Wynn","week":"2026-09-07","day":"Thursday","di":3,"loc_am":"RES-KENNESAW","loc_pm":"RES-KENNESAW","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"provider":"Benjamin Wynn","week":"2026-09-07","day":"Friday","di":4,"loc_am":"HC-LAGRANGE","loc_pm":"HC-LAGRANGE","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","available","filled","available","available","available","available","available"]},{"provider":"Darin White","week":"2026-09-07","day":"Monday","di":0,"loc_am":"Admin/Education","loc_pm":"Admin/Education","pto":true,"traveling":false,"no_sched":false,"slots":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]},{"provider":"Darin White","week":"2026-09-07","day":"Tuesday","di":1,"loc_am":"HC-MTG","loc_pm":"HC-MTG","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","noScheduleNoSlot","filled","filled","filled","filled","filled"]},{"provider":"Darin White","week":"2026-09-07","day":"Wednesday","di":2,"loc_am":"HUEGA-ATL","loc_pm":"HUEGA-ATL","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","filled","available","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot"]},{"provider":"Darin White","week":"2026-09-07","day":"Thursday","di":3,"loc_am":"Admin/Education","loc_pm":"Admin/Education","pto":true,"traveling":false,"no_sched":false,"slots":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]},{"provider":"Darin White","week":"2026-09-07","day":"Friday","di":4,"loc_am":"Admin/Education","loc_pm":"Admin/Education","pto":true,"traveling":false,"no_sched":false,"slots":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]},{"provider":"Evan Kern","week":"2026-09-07","day":"Monday","di":0,"loc_am":"Admin/Education","loc_pm":"Admin/Education","pto":false,"traveling":false,"no_sched":true,"slots":["noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot"]},{"provider":"Evan Kern","week":"2026-09-07","day":"Tuesday","di":1,"loc_am":"TOC-ATHENS","loc_pm":"TOC-ATHENS","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","noScheduleNoSlot","filled","filled","filled","filled"]},{"provider":"Evan Kern","week":"2026-09-07","day":"Wednesday","di":2,"loc_am":"TOC-HVILLE","loc_pm":"TOC-HVILLE","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","noScheduleNoSlot","filled","filled","filled","filled"]},{"provider":"Evan Kern","week":"2026-09-07","day":"Thursday","di":3,"loc_am":"EMG-ATHENS","loc_pm":"EMG-ATHENS","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","available","available","available","available","available","available"]},{"provider":"Evan Kern","week":"2026-09-07","day":"Friday","di":4,"loc_am":"TOC-HVILLE","loc_pm":"TOC-HVILLE","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","noScheduleNoSlot","filled","filled","filled","filled"]},{"provider":"Karah Loftin","week":"2026-08-31","day":"Monday","di":0,"loc_am":"RES-MCDONOUGH","loc_pm":"RES-MCDONOUGH","pto":true,"traveling":false,"no_sched":false,"slots":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]},{"provider":"Karah Loftin","week":"2026-08-31","day":"Tuesday","di":1,"loc_am":"AOA","loc_pm":"AOA","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","available","available","available"]},{"provider":"Karah Loftin","week":"2026-08-31","day":"Wednesday","di":2,"loc_am":"AHS-JOHNS CREEK","loc_pm":"AHS-LAWRENCEVILLE","pto":false,"traveling":true,"no_sched":false,"slots":["filled","filled","filled","available","traveling","filled","filled","filled","available"]},{"provider":"Karah Loftin","week":"2026-08-31","day":"Thursday","di":3,"loc_am":"AHS-EAST COBB","loc_pm":"AHS-EAST COBB","pto":false,"traveling":false,"no_sched":false,"slots":["noScheduleNoSlot","filled","filled","available","filled","available","available","available","available"]},{"provider":"Karah Loftin","week":"2026-08-31","day":"Friday","di":4,"loc_am":"AHS-SMYRNA","loc_pm":"AHS-SMYRNA","pto":false,"traveling":false,"no_sched":true,"slots":["noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot"]},{"provider":"Jedd Thorderson","week":"2026-09-07","day":"Monday","di":0,"loc_am":"Admin/Education","loc_pm":"Admin/Education","pto":false,"traveling":false,"no_sched":true,"slots":["noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot"]},{"provider":"Jedd Thorderson","week":"2026-09-07","day":"Tuesday","di":1,"loc_am":"BJISG","loc_pm":"BJISG","pto":false,"traveling":false,"no_sched":false,"slots":["noScheduleNoSlot","filled","filled","filled","noScheduleNoSlot","filled","filled","filled","available"]},{"provider":"Jedd Thorderson","week":"2026-09-07","day":"Wednesday","di":2,"loc_am":"TOI-OCALA","loc_pm":"TOI-OCALA","pto":false,"traveling":false,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"provider":"Jedd Thorderson","week":"2026-09-07","day":"Thursday","di":3,"loc_am":"TOI-GAINESVILLE","loc_pm":"TOI-GAINESVILLE","pto":false,"traveling":true,"no_sched":false,"slots":["filled","filled","filled","filled","filled","filled","filled","filled","traveling"]},{"provider":"Jedd Thorderson","week":"2026-09-07","day":"Friday","di":4,"loc_am":"HC-DUBLIN","loc_pm":"HC-DUBLIN","pto":false,"traveling":false,"no_sched":false,"slots":["available","filled","available","filled","available","available","available","available","available"]}];
+
+var SLOT_TIMES = ['8–9a','9–10a','10–11a','11a–12p','12–1p','1–2p','2–3p','3–4p','4–5p'];
+var DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+var LOC_FULL = {
+  'AHS-EAST COBB':'Atlanta Hand Specialist – East Cobb','AHS-JOHNS CREEK':'Atlanta Hand Specialist – Johns Creek',
+  'AHS-LAWRENCEVILLE':'Atlanta Hand Specialist – Lawrenceville','AHS-SMYRNA':'Atlanta Hand Specialist – Smyrna',
+  'AOA':'Anniston Orthopaedic Associates','BBJ':'Baldwin Bone & Joint – Daphne',
+  'BJISG':'Bone & Joint Inst. of South Georgia – Jesup','CROTWELL':'Crotwell Orthopedic Clinic – Mobile',
+  'EMG-ATHENS':'EMG Solutions – Athens','EMG-HVILLE':'EMG Solutions – Huntsville',
+  'EMERGE-ARDEN':'EmergeOrtho – Arden, NC','EMERGE-ASHVILLE':'EmergeOrtho – Asheville, NC',
+  'EMERGE-MORGANTON':'EmergeOrtho – Morganton, NC','HC-DOTHAN':'Hughston Clinic – Dothan',
+  'HC-DUBLIN':'Hughston Clinic – Dublin','HC-LAGRANGE':'Hughston Clinic – LaGrange',
+  'HC-MTG':'Hughston Clinic – Montgomery','HC-SKYLINE':'Hughston Clinic at TriStar Skyline',
+  'HC-STONECREST':'Hughston Clinic at TriStar StoneCrest','HC-THOMASTON':'Hughston Clinic – Thomaston',
+  'HC-VALDOSTA':'Hughston Clinic – Valdosta','HUEGA-ATL':'Hand & Upper Extremity Center of GA – Atlanta',
+  'RES-AUSTELL':'Resurgens Orthopaedics – Austell','RES-KENNESAW':'Resurgens Orthopaedics – Kennesaw',
+  'RES-MCDONOUGH':'Resurgens Orthopaedics – McDonough','RMC':'Russell Medical Center – Alexander City',
+  'SBJS':'Southern Bone & Joint Specialists – Dothan','TOC-ATHENS':'The Orthopaedic Center – Athens',
+  'TOC-HVILLE':'The Orthopaedic Center – Huntsville','TOI-GAINESVILLE':'The Orthopaedic Institute – Gainesville',
+  'TOI-OCALA':'The Orthopaedic Institute – Ocala','WTBJ-JACKSON':'W. TN Bone & Joint – Jackson',
+  'WTBJ-PARIS':'W. TN Bone & Joint – Paris','Holiday':'Holiday','Admin/Education':'Admin / Education Day',
+};
+function lf(l){ return LOC_FULL[l]||l||'—'; }
+
+// Weeks present
+var weeks = [...new Set(RAW.map(r=>r.week))].sort();
+// Sept-only: drop Aug
+var septWeeks = weeks.filter(w=>w>='2026-09-01');
+var allWeeks = ['all', ...septWeeks];
+var curWeek = 'all';
+
+// Compute global stats
+var totalAvail=0, totalFilled=0;
+RAW.forEach(function(r){
+  r.slots.forEach(function(s){
+    if(s==='available') totalAvail++;
+    if(s==='filled') totalFilled++;
+  });
+});
+document.getElementById('stat-avail-slots').textContent = totalAvail;
+document.getElementById('stat-filled-slots').textContent = totalFilled;
+var fillRate = totalFilled+totalAvail>0 ? Math.round(totalFilled/(totalFilled+totalAvail)*100) : 0;
+document.getElementById('stat-pct').textContent = fillRate+'%';
+
+// Provider role map
+var ROLES = {
+  'Karah Loftin':'Student SPT','Jedd Thorderson':'Student SPT','Daniel Trapp':'Resident (CI)',
+  'Colby Kunkel':'Resident (CI)','John Lugo':'ECS Provider','Drayton Perkins':'Student SPT',
+  'Timothy Dau':'ECS Provider','Marshall Lassiter':'Student','Benjamin Wynn':'Student',
+  'Darin White':'ECS Provider','Evan Kern':'Resident (CI)'
+};
+var PROV_ORDER = ['Darin White','John Lugo','Timothy Dau','Colby Kunkel','Evan Kern','Daniel Trapp',
+                  'Benjamin Wynn','Marshall Lassiter','Drayton Perkins','Jedd Thorderson','Karah Loftin'];
+
+function slotColor(s){ return s==='filled'?'#22c55e':s==='available'?'#fbbf24':s==='pto'?'#94a3b8':s==='traveling'?'#818cf8':'#e2e8f0'; }
+
+// ── WEEK TABS ──────────────────────────────────────────────────────────────
+function buildWeekTabs(containerId, onChange) {
+  var el = document.getElementById(containerId);
+  allWeeks.forEach(function(w){
+    var btn = document.createElement('button');
+    btn.className = 'week-btn' + (w===curWeek?' active':'');
+    btn.textContent = w==='all' ? 'All Weeks' : 'Wk of ' + new Date(w+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    btn.onclick = function(){
+      curWeek = w;
+      document.querySelectorAll('.week-btn').forEach(function(b){b.classList.remove('active');});
+      document.querySelectorAll('.week-btn').forEach(function(b){
+        if(b.textContent === btn.textContent) b.classList.add('active');
+      });
+      onChange();
+    };
+    el.appendChild(btn);
+  });
+}
+buildWeekTabs('week-tabs', function(){ renderProvider(); });
+buildWeekTabs('week-tabs-loc', function(){ renderLocation(); });
+buildWeekTabs('week-tabs-hm', function(){ renderHeatmap(); });
+
+// Populate provider filter
+var fp = document.getElementById('p-filter-prov');
+PROV_ORDER.forEach(function(p){ var o=document.createElement('option');o.value=p;o.textContent=p;fp.appendChild(o); });
+
+function filteredData(){
+  return RAW.filter(function(r){
+    if(curWeek!=='all' && r.week!==curWeek) return false;
+    // Only Sept rows (week >= Sep 1) — include Aug-31 week since it's the Sept 1 week
+    return true;
+  });
+}
+
+// ── PROVIDER VIEW ──────────────────────────────────────────────────────────
+function renderProvider(){
+  var fp = document.getElementById('p-filter-prov').value;
+  var srch = document.getElementById('p-srch').value.toLowerCase();
+  var data = filteredData();
+
+  var byProv = {};
+  data.forEach(function(r){
+    if(fp && r.provider!==fp) return;
+    if(srch && !r.provider.toLowerCase().includes(srch) && !(r.loc_am||'').toLowerCase().includes(srch) && !(r.loc_pm||'').toLowerCase().includes(srch)) return;
+    if(!byProv[r.provider]) byProv[r.provider]=[];
+    byProv[r.provider].push(r);
+  });
+
+  var html='';
+  PROV_ORDER.forEach(function(prov){
+    if(!byProv[prov]) return;
+    var rows = byProv[prov];
+    // total available slots
+    var ta=0,tf=0;
+    rows.forEach(function(r){ r.slots.forEach(function(s){ if(s==='available')ta++; if(s==='filled')tf++; }); });
+
+    // group by week
+    var byWeek={};
+    rows.forEach(function(r){ if(!byWeek[r.week])byWeek[r.week]=[]; byWeek[r.week].push(r); });
+
+    html+='<div class="prov-section">';
+    html+='<div class="prov-hdr"><div><div class="prov-hdr-name">'+prov+'</div><div class="prov-hdr-role">'+(ROLES[prov]||'')+'</div></div>';
+    html+='<div class="prov-hdr-avail">'+ta+' open slots &nbsp;·&nbsp; '+tf+' filled</div></div>';
+
+    Object.keys(byWeek).sort().forEach(function(wk){
+      var wrows = byWeek[wk].slice().sort(function(a,b){return a.di-b.di;});
+      var wlbl = new Date(wk+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      html+='<div class="prov-week-row"><div class="week-lbl">Wk of<br>'+wlbl+'</div>';
+
+      // fill in all 5 days
+      var dayMap={};
+      wrows.forEach(function(r){dayMap[r.di]=r;});
+      for(var di=0;di<5;di++){
+        var r=dayMap[di];
+        html+='<div class="day-col">';
+        if(!r){
+          html+='<div class="day-status-lbl status-none" style="font-size:0.58rem;margin-top:10px">—</div>';
+        } else if(r.pto){
+          html+='<div class="slot-grid">';
+          for(var i=0;i<9;i++) html+='<div class="slot-block" style="background:#94a3b8"></div>';
+          html+='</div><div class="day-status-lbl status-pto">PTO</div>';
+        } else if(r.no_sched && !(r.loc_am)){
+          html+='<div class="slot-grid">';
+          for(var i=0;i<9;i++) html+='<div class="slot-block" style="background:#e2e8f0"></div>';
+          html+='</div><div class="day-status-lbl status-none">No Sched</div>';
+        } else {
+          var avail=r.slots.filter(function(s){return s==='available';}).length;
+          html+='<div class="slot-grid">';
+          r.slots.forEach(function(s,si){
+            html+='<div class="slot-block" style="background:'+slotColor(s)+'" onmouseenter="showTip(event,\''+prov+'\',\''+r.day+'\',\''+wlbl+'\','+JSON.stringify(r.slots)+')" onmouseleave="hideTip()"></div>';
+          });
+          html+='</div>';
+          // location tags
+          var sameLocAmPm = r.loc_am===r.loc_pm;
+          if(sameLocAmPm){
+            html+='<div class="loc-tag">'+(r.loc_am||'—')+'</div>';
+          } else {
+            html+='<div class="loc-tag">AM: '+(r.loc_am||'—')+'</div>';
+            html+='<div class="loc-tag split">PM: '+(r.loc_pm||'—')+'</div>';
+          }
+          if(avail>0) html+='<div class="avail-count">'+avail+' open</div>';
+          if(r.traveling) html+='<div class="day-status-lbl status-travel" style="font-size:0.58rem">✈ Travel</div>';
+        }
+        html+='</div>';
+      }
+      html+='</div>';
+    });
+    html+='</div>';
+  });
+  if(!html) html='<div style="text-align:center;padding:40px;color:#94a3b8">No data for selection.</div>';
+  document.getElementById('provider-content').innerHTML=html;
+}
+renderProvider();
+
+// ── LOCATION VIEW ──────────────────────────────────────────────────────────
+function renderLocation(){
+  var srch = (document.getElementById('l-srch').value||'').toLowerCase();
+  var data = filteredData();
+
+  // group by location
+  var byLoc={};
+  data.forEach(function(r){
+    if(r.pto || r.no_sched) return;
+    [r.loc_am, r.loc_pm].filter(Boolean).forEach(function(loc){
+      if(loc==='Holiday'||loc==='Admin/Education') return;
+      if(!byLoc[loc]) byLoc[loc]=[];
+      // Avoid duplicate entries (same loc_am and loc_pm)
+      var key = r.provider+'|'+r.week+'|'+r.day+'|'+loc;
+      if(!byLoc[loc].find(function(x){return x._key===key;})){
+        var entry = Object.assign({},r,{_key:key,_loc:loc,_ispm: loc===r.loc_pm && loc!==r.loc_am});
+        byLoc[loc].push(entry);
+      }
+    });
+  });
+
+  var locs = Object.keys(byLoc).sort().filter(function(l){ return !srch||(l.toLowerCase().includes(srch)||(LOC_FULL[l]||'').toLowerCase().includes(srch)); });
+
+  var html='';
+  locs.forEach(function(loc){
+    var entries = byLoc[loc].slice().sort(function(a,b){ return a.week.localeCompare(b.week)||a.di-b.di||a.provider.localeCompare(b.provider); });
+    var totalAvail = 0;
+    entries.forEach(function(r){ r.slots.forEach(function(s){ if(s==='available') totalAvail++; }); });
+
+    html+='<div class="loc-card">';
+    html+='<div class="loc-card-hdr"><div><div class="loc-card-name">'+loc+'</div><div class="loc-card-sub">'+lf(loc)+'</div></div>';
+    html+='<div style="font-size:0.72rem;opacity:0.8">'+totalAvail+' open slots across '+entries.length+' visits</div></div>';
+    html+='<table class="loc-table"><thead><tr><th>Week</th><th>Day</th><th>Provider</th><th>Slots (8a–5p)</th><th>Available</th><th>Status</th></tr></thead><tbody>';
+
+    entries.forEach(function(r){
+      var avail=r.slots.filter(function(s){return s==='available';}).length;
+      var filled=r.slots.filter(function(s){return s==='filled';}).length;
+      var wlbl = new Date(r.week+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      var chipCls = avail>0?'chip-avail': (r.traveling?'chip-travel':(r.pto?'chip-pto':'chip-full'));
+      var chipTxt = avail>0?(avail+' open'):(r.traveling?'Traveling':(r.pto?'PTO':'Full'));
+      html+='<tr>';
+      html+='<td style="color:#64748b;white-space:nowrap">Wk '+wlbl+'</td>';
+      html+='<td style="font-weight:600">'+r.day+'</td>';
+      html+='<td>'+r.provider+(r._ispm?' <span style="font-size:0.6rem;color:#8b5cf6">(PM)</span>':'')+'</td>';
+      html+='<td><div class="mini-slots">';
+      r.slots.forEach(function(s){ html+='<div class="mini-s" style="background:'+slotColor(s)+'" title="'+SLOT_TIMES[r.slots.indexOf(s)]+'"></div>'; });
+      html+='</div></td>';
+      html+='<td>'+(avail>0?'<span class="avail-count">'+avail+'</span>':'<span style="color:#94a3b8">0</span>')+'</td>';
+      html+='<td><span class="chip '+chipCls+'">'+chipTxt+'</span></td>';
+      html+='</tr>';
+    });
+    html+='</tbody></table></div>';
+  });
+  if(!html) html='<div style="text-align:center;padding:40px;color:#94a3b8">No locations found.</div>';
+  document.getElementById('location-content').innerHTML=html;
+}
+
+// ── HEATMAP VIEW ───────────────────────────────────────────────────────────
+function renderHeatmap(){
+  var data = filteredData();
+  // rows = providers, cols = week+day combos
+  var colKeys=[];
+  var seenCols={};
+  data.forEach(function(r){
+    var k=r.week+'|'+r.day;
+    if(!seenCols[k]){seenCols[k]=true;colKeys.push({week:r.week,day:r.day,di:r.di});}
+  });
+  colKeys.sort(function(a,b){return a.week.localeCompare(b.week)||a.di-b.di;});
+
+  // group data by prov+week+day
+  var lookup={};
+  data.forEach(function(r){lookup[r.provider+'|'+r.week+'|'+r.day]=r;});
+
+  var html='<table class="heatmap-table"><thead><tr><th>Provider</th>';
+  colKeys.forEach(function(c){
+    var wlbl=new Date(c.week+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    html+='<th style="min-width:58px">'+c.day.slice(0,3)+'<br><span style="font-weight:400;font-size:0.6rem">'+wlbl+'</span></th>';
+  });
+  html+='</tr></thead><tbody>';
+
+  PROV_ORDER.forEach(function(prov){
+    html+='<tr><td class="hm-row-lbl">'+prov+'<br><span style="font-size:0.6rem;color:#94a3b8;font-weight:400">'+(ROLES[prov]||'')+'</span></td>';
+    colKeys.forEach(function(c){
+      var r=lookup[prov+'|'+c.week+'|'+c.day];
+      if(!r){html+='<td class="hm-none">—</td>';return;}
+      if(r.pto){html+='<td class="hm-pto">PTO</td>';return;}
+      if(r.no_sched && !r.loc_am){html+='<td class="hm-none">—</td>';return;}
+      var avail=r.slots.filter(function(s){return s==='available';}).length;
+      var filled=r.slots.filter(function(s){return s==='filled';}).length;
+      var cls = avail===0&&filled===0?'hm-none':avail===0?'hm-full':avail<=1?'hm-1':avail<=2?'hm-2':avail<=3?'hm-3':avail<=4?'hm-4':'hm-5p';
+      var lbl = avail===0&&filled===0?'—':avail===0?'Full':avail;
+      html+='<td class="'+cls+'" onmouseenter="showTip(event,\''+prov+'\',\''+c.day+'\',new Date(\''+c.week+'T12:00:00\').toLocaleDateString(\'en-US\',{month:\'short\',day:\'numeric\'}),'+JSON.stringify(r.slots)+')" onmouseleave="hideTip()">'+lbl+'</td>';
+    });
+    html+='</tr>';
+  });
+  html+='</tbody></table>';
+  html+='<div class="legend" style="margin-top:12px;padding-left:2px;">';
+  html+='<div class="leg"><div class="leg-sq hm-full" style="width:20px;height:12px;border-radius:3px;background:#dcfce7;border:1px solid #e2e8f0"></div>Fully Booked</div>';
+  html+='<div class="leg"><div class="leg-sq" style="background:#fef9c3;border:1px solid #e2e8f0;width:20px;height:12px;border-radius:3px"></div>1–2 Open</div>';
+  html+='<div class="leg"><div class="leg-sq" style="background:#fde68a;border:1px solid #e2e8f0;width:20px;height:12px;border-radius:3px"></div>3–4 Open</div>';
+  html+='<div class="leg"><div class="leg-sq" style="background:#f59e0b;width:20px;height:12px;border-radius:3px"></div>5+ Open</div>';
+  html+='<div class="leg"><div class="leg-sq hm-pto" style="width:20px;height:12px;border-radius:3px;background:#f1f5f9;border:1px solid #e2e8f0"></div>PTO / Holiday</div>';
+  html+='<div class="leg"><div class="leg-sq hm-none" style="width:20px;height:12px;border-radius:3px;background:#fafafa;border:1px solid #e2e8f0"></div>Not Scheduled</div>';
+  html+='</div>';
+  document.getElementById('heatmap-content').innerHTML=html;
+}
+
+// ── TOOLTIP ────────────────────────────────────────────────────────────────
+function showTip(e, prov, day, wklbl, slots){
+  var t=document.getElementById('tip');
+  var avail=slots.filter(function(s){return s==='available';}).length;
+  var filled=slots.filter(function(s){return s==='filled';}).length;
+  var html='<b>'+prov+'</b> · '+day+' (Wk '+wklbl+')<br>';
+  html+='<span style="opacity:0.75">'+(ROLES[prov]||'')+'</span><br>';
+  html+='✅ '+filled+' filled &nbsp; 🟡 '+avail+' available<br>';
+  html+='<div style="display:flex;gap:3px;margin-top:5px;">';
+  slots.forEach(function(s,i){
+    html+='<div style="text-align:center"><div style="width:18px;height:18px;border-radius:3px;background:'+slotColor(s)+'"></div><div style="font-size:0.5rem;color:rgba(255,255,255,0.6);margin-top:1px">'+SLOT_TIMES[i].split('–')[0]+'</div></div>';
+  });
+  html+='</div>';
+  t.innerHTML=html; t.style.display='block';
+}
+function hideTip(){document.getElementById('tip').style.display='none';}
+document.addEventListener('mousemove',function(e){
+  var t=document.getElementById('tip');
+  if(t.style.display!=='none'){t.style.left=(e.clientX+14)+'px';t.style.top=(e.clientY-8)+'px';}
+});
+
+// ── TAB SWITCH ─────────────────────────────────────────────────────────────
+function showTab(t,el){
+  ['provider','location','heatmap'].forEach(function(id){
+    document.getElementById('tab-'+id).classList.toggle('hidden',id!==t);
+  });
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active');});
+  el.classList.add('active');
+  if(t==='location') renderLocation();
+  if(t==='heatmap')  renderHeatmap();
+}
+</script>
+</body>
+</html>
