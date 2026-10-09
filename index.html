@@ -1,596 +1,291 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>EMG Solutions — September 2026 Schedule Availability</title>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>EMG Schedule Availability</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a2332;font-size:13px;}
-
-.header{background:linear-gradient(135deg,#1a3a5c 0%,#2d6a9f 100%);color:white;padding:16px 24px;display:flex;align-items:center;gap:12px;}
-.logo{width:40px;height:40px;background:rgba(255,255,255,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1rem;flex-shrink:0;}
-.header h1{font-size:1.1rem;font-weight:700;}
-.header p{font-size:0.72rem;opacity:0.8;margin-top:2px;}
-.hdr-pills{margin-left:auto;display:flex;gap:8px;flex-shrink:0;}
-.hdr-pill{background:rgba(255,255,255,0.15);border-radius:6px;padding:5px 11px;font-size:0.7rem;text-align:center;}
-.hdr-pill b{display:block;font-size:1.1rem;font-weight:800;}
-
-.tabs{display:flex;background:white;border-bottom:2px solid #e2e8f0;padding:0 20px;gap:4px;}
-.tab{padding:11px 18px;font-size:0.8rem;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;color:#64748b;transition:all 0.2s;white-space:nowrap;}
-.tab.active{border-bottom-color:#2d6a9f;color:#2d6a9f;}
-
-.content{padding:18px 20px;max-height:calc(100vh - 120px);overflow-y:auto;}
-
-/* ── CONTROLS ── */
-.controls{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
-.controls select,.controls input{padding:5px 10px;border-radius:7px;border:1.5px solid #e2e8f0;font-size:0.75rem;outline:none;background:white;}
-.controls select:focus,.controls input:focus{border-color:#2d6a9f;}
-.week-tabs{display:flex;gap:4px;}
-.week-btn{padding:5px 12px;border-radius:6px;border:1.5px solid #e2e8f0;background:white;font-size:0.72rem;font-weight:600;cursor:pointer;color:#64748b;}
-.week-btn.active{background:#2d6a9f;border-color:#2d6a9f;color:white;}
-
-/* ── PROVIDER CALENDAR VIEW ── */
-.prov-section{margin-bottom:20px;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08);}
-.prov-hdr{background:linear-gradient(135deg,#1a3a5c,#2d6a9f);color:white;padding:10px 14px;display:flex;align-items:center;gap:10px;}
-.prov-hdr-name{font-weight:700;font-size:0.9rem;}
-.prov-hdr-role{font-size:0.68rem;opacity:0.75;}
-.prov-hdr-avail{margin-left:auto;font-size:0.7rem;opacity:0.9;}
-.prov-week-row{background:white;display:grid;grid-template-columns:100px repeat(5,1fr);border-bottom:1px solid #f1f5f9;}
-.prov-week-row:last-child{border-bottom:none;}
-.week-lbl{padding:8px 10px;font-size:0.68rem;font-weight:700;color:#94a3b8;display:flex;align-items:center;border-right:1px solid #f1f5f9;background:#fafbfc;}
-.day-col{padding:6px 8px;border-right:1px solid #f1f5f9;min-height:72px;}
-.day-col:last-child{border-right:none;}
-
-/* slot grid: 9 slots = 3 AM cols + noon + 4 PM cols, displayed as mini blocks */
-.slot-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:2px;margin-bottom:4px;}
-.slot-block{height:22px;border-radius:2px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:2px;}
-.slot-time-lbl{font-size:0.42rem;color:rgba(255,255,255,0.85);font-weight:700;line-height:1;text-align:center;letter-spacing:-0.01em;}
-.slot-filled   {background:#22c55e;}
-.slot-available{background:#fbbf24;}
-.slot-pto      {background:#7c3aed;}
-.slot-traveling{background:#7c3aed;}
-.slot-none     {background:#ef4444;}
-
-.loc-tag{font-size:0.6rem;font-weight:600;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
-.loc-tag.split{color:#8b5cf6;}
-.day-status-lbl{font-size:0.62rem;font-weight:700;text-align:center;padding:2px 0;}
-.status-pto   {color:#64748b;}
-.status-avail {color:#ea580c;}
-.status-full  {color:#16a34a;}
-.status-none  {color:#cbd5e1;}
-.status-travel{color:#6366f1;}
-.avail-count  {font-size:0.68rem;font-weight:800;color:#ea580c;}
-
-/* ── LOCATION VIEW ── */
-.loc-card{background:white;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.07);margin-bottom:14px;overflow:hidden;}
-.loc-card-hdr{background:#1a3a5c;color:white;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;}
-.loc-card-name{font-weight:700;font-size:0.88rem;}
-.loc-card-sub{font-size:0.68rem;opacity:0.75;}
-.loc-table{width:100%;border-collapse:collapse;}
-.loc-table th{background:#f8fafc;padding:7px 10px;text-align:left;font-size:0.67rem;font-weight:700;text-transform:uppercase;color:#64748b;letter-spacing:0.04em;border-bottom:1px solid #e2e8f0;}
-.loc-table td{padding:7px 10px;border-bottom:1px solid #f1f5f9;font-size:0.75rem;vertical-align:middle;}
-.loc-table tr:last-child td{border-bottom:none;}
-.loc-table tr:hover td{background:#fafcff;}
-.mini-slots{display:flex;gap:2px;align-items:center;}
-.mini-s{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
-.chip{display:inline-block;padding:2px 7px;border-radius:8px;font-size:0.65rem;font-weight:700;}
-.chip-avail {background:#ffedd5;color:#c2410c;}
-.chip-full  {background:#dcfce7;color:#15803d;}
-.chip-pto   {background:#ede9fe;color:#5b21b6;}
-.chip-travel{background:#ede9fe;color:#5b21b6;}
-
-/* ── HEATMAP ── */
-.heatmap-wrap{overflow-x:auto;}
-.heatmap-table{border-collapse:collapse;white-space:nowrap;}
-.heatmap-table th{padding:6px 8px;font-size:0.65rem;font-weight:700;color:#64748b;text-transform:uppercase;background:#f8fafc;border:1px solid #e2e8f0;}
-.heatmap-table td{padding:0;border:1px solid #e2e8f0;width:60px;height:36px;text-align:center;font-size:0.7rem;font-weight:700;vertical-align:middle;cursor:default;}
-.hm-0  {background:#f1f5f9;color:#94a3b8;}
-.hm-1  {background:#fefce8;color:#854d0e;}
-.hm-2  {background:#fef9c3;color:#713f12;}
-.hm-3  {background:#fde68a;color:#78350f;}
-.hm-4  {background:#fcd34d;color:#451a03;}
-.hm-5p {background:#f59e0b;color:white;}
-.hm-full{background:#dcfce7;color:#15803d;}
-.hm-pto {background:#ede9fe;color:#5b21b6;font-size:0.55rem;}
-.hm-none{background:#fee2e2;color:#b91c1c;}
-.hm-row-lbl{padding:6px 10px;font-size:0.72rem;font-weight:600;background:#fafbfc;border:1px solid #e2e8f0;white-space:nowrap;text-align:left;}
-
-/* ── LEGEND ── */
-.legend{display:flex;gap:14px;flex-wrap:wrap;padding:10px 0;font-size:0.7rem;align-items:center;}
-.leg{display:flex;align-items:center;gap:5px;}
-.leg-sq{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
-
-.tip{position:fixed;background:#1e293b;color:white;padding:9px 13px;border-radius:8px;font-size:0.73rem;pointer-events:none;z-index:9999;display:none;max-width:280px;line-height:1.6;box-shadow:0 4px 16px rgba(0,0,0,0.3);}
-.hidden{display:none;}
-
-/* Availability bar */
-.avail-bar-wrap{height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin-top:2px;}
-.avail-bar{height:6px;border-radius:3px;background:#fbbf24;}
+/* Layout: navy header band with KPI pills, tab bar, filter row, then provider cards / location tables / heatmap */
+:root{
+  --bg:#eef2f7; --surface:#ffffff; --surface-2:#f6f8fb; --fg:#1b2a3d; --muted:#64748b; --line:#dde3ec;
+  --navy:#1a365d; --navy-2:#2c5282; --on-navy:#ffffff;
+  --filled:#22c55e; --avail:#f97316; --away:#8b5cf6; --none:#ef4444;
+  --avail-text:#c2410c; --away-text:#6d28d9;
+  --h-full:#dcfce7; --h-low:#fef9c3; --h-mid:#fde68a; --h-high:#f59e0b; --h-away:#ede9fe; --h-none:#fee2e2;
+  --h-full-fg:#166534; --h-low-fg:#854d0e; --h-high-fg:#ffffff; --h-away-fg:#6d28d9; --h-none-fg:#b91c1c;
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1722; --surface:#172231; --surface-2:#1d2a3c; --fg:#e5ebf3; --muted:#94a3b8; --line:#2a3a50;
+  --navy:#132a4a; --navy-2:#1e3a66; --on-navy:#ffffff;
+  --avail-text:#fb923c; --away-text:#c4b5fd;
+  --h-full:#14532d; --h-low:#4d3f0b; --h-mid:#7c5a0a; --h-high:#d97706; --h-away:#33295a; --h-none:#4c1d1d;
+  --h-full-fg:#bbf7d0; --h-low-fg:#fde68a; --h-high-fg:#ffffff; --h-away-fg:#ddd6fe; --h-none-fg:#fecaca;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1722; --surface:#172231; --surface-2:#1d2a3c; --fg:#e5ebf3; --muted:#94a3b8; --line:#2a3a50;
+  --navy:#132a4a; --navy-2:#1e3a66; --on-navy:#ffffff;
+  --avail-text:#fb923c; --away-text:#c4b5fd;
+  --h-full:#14532d; --h-low:#4d3f0b; --h-mid:#7c5a0a; --h-high:#d97706; --h-away:#33295a; --h-none:#4c1d1d;
+  --h-full-fg:#bbf7d0; --h-low-fg:#fde68a; --h-high-fg:#ffffff; --h-away-fg:#ddd6fe; --h-none-fg:#fecaca;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px}
+header.top{background:linear-gradient(90deg,var(--navy),var(--navy-2));color:var(--on-navy);padding:14px 20px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+.brand{display:flex;gap:12px;align-items:center;min-width:0}
+.logo{width:34px;height:34px;border-radius:7px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-weight:800;font-size:12px;flex:none}
+.brand h1{margin:0;font-size:17px;font-weight:700;text-wrap:balance}
+.brand p{margin:2px 0 0;font-size:11.5px;opacity:.8}
+.kpis{display:flex;gap:8px;flex-wrap:wrap}
+.kpi{background:rgba(255,255,255,.14);border-radius:7px;padding:6px 12px;text-align:center;min-width:72px}
+.kpi b{display:block;font-size:17px;font-variant-numeric:tabular-nums}
+.kpi span{font-size:10.5px;opacity:.85}
+nav.tabs{background:var(--surface);border-bottom:1px solid var(--line);display:flex;gap:4px;padding:0 16px;overflow-x:auto}
+nav.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:13px 14px 10px;color:var(--muted);font:inherit;font-weight:500;cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--navy-2);border-color:var(--navy-2);font-weight:600}
+:root[data-theme="dark"] nav.tabs button[aria-selected="true"]{color:var(--fg)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) nav.tabs button[aria-selected="true"]{color:var(--fg)}}
+main{padding:16px;max-width:1600px;margin:0 auto}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.btn,.sel,.search{font:inherit;font-size:12.5px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:6px;padding:6px 10px;height:32px}
+.btn{cursor:pointer;font-weight:600}
+.btn.cur{background:var(--navy);border-color:var(--navy);color:var(--on-navy)}
+.btn small{font-weight:500;opacity:.75;margin-left:6px}
+.sel{cursor:pointer;padding-right:6px}
+.sel.on{border-color:var(--navy-2);box-shadow:0 0 0 1px var(--navy-2)}
+.search{min-width:0;width:220px;max-width:100%}
+.ctl-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-left:4px}
+.btn:focus-visible,.sel:focus-visible,.search:focus-visible,nav.tabs button:focus-visible{outline:2px solid var(--avail);outline-offset:1px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--fg);margin:4px 0 14px}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.card{background:var(--surface);border-radius:10px;overflow:hidden;margin-bottom:16px;box-shadow:0 1px 2px rgba(15,23,42,.08)}
+.card-h{background:linear-gradient(90deg,var(--navy),var(--navy-2));color:var(--on-navy);padding:10px 14px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.card-h h2{margin:0;font-size:14.5px}
+.card-h span{font-size:11.5px;opacity:.85}
+.scroll{overflow-x:auto}
+.wk{display:grid;grid-template-columns:78px repeat(5,minmax(180px,1fr));border-top:1px solid var(--line);min-width:980px}
+.wk:first-child{border-top:0}
+.wk .lbl{padding:10px 8px;font-size:11.5px;font-weight:600;color:var(--muted);display:flex;align-items:center;background:var(--surface-2)}
+.day{padding:8px 6px;border-left:1px solid var(--line);min-width:0}
+.dname{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.slots{display:grid;grid-template-columns:repeat(9,1fr);gap:2px}
+.s{height:17px;border-radius:3px;font-size:8.5px;font-weight:700;color:#fff;display:grid;place-items:center}
+.s.filled{background:var(--filled)} .s.available{background:var(--avail)} .s.pto,.s.traveling{background:var(--away)} .s.noScheduleNoSlot,.s.blank{background:var(--none)}
+.loc{font-size:11px;margin-top:5px;color:var(--fg);overflow-wrap:anywhere}
+.loc .pm{color:var(--away-text)}
+.open{font-size:11px;font-weight:700;color:var(--avail-text);margin-top:2px}
+.tag{font-size:10.5px;color:var(--away-text);margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:640px}
+th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+td{padding:7px 12px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:0}
+.mini{display:inline-flex;gap:2px}
+.mini i{width:9px;height:9px;border-radius:2px}
+.mini i.filled{background:var(--filled)} .mini i.available{background:var(--avail)} .mini i.pto,.mini i.traveling{background:var(--away)} .mini i.noScheduleNoSlot,.mini i.blank{background:var(--none)}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600}
+.pill.o{background:var(--h-mid);color:var(--h-low-fg)} .pill.f{background:var(--h-full);color:var(--h-full-fg)} .pill.a{background:var(--h-away);color:var(--h-away-fg)} .pill.n{background:var(--h-none);color:var(--h-none-fg)}
+.num-o{color:var(--avail-text);font-weight:700}
+.hm{border-collapse:separate;border-spacing:3px;min-width:0;width:auto;font-size:11.5px}
+.hm th{background:none;border:0;padding:2px 4px;text-align:center;font-size:9.5px;line-height:1.2}
+.hm th.wkh{font-size:10.5px;color:var(--fg);border-bottom:2px solid var(--line)}
+.hm th.pn{text-align:left}
+.hm td{border:0;padding:0}
+.hm td.pn{font-weight:600;white-space:nowrap;padding-right:10px;font-size:12px}
+.hc{width:52px;height:28px;border-radius:5px;display:grid;place-items:center;font-weight:700;font-size:11px}
+.hc.full{background:var(--h-full);color:var(--h-full-fg)} .hc.low{background:var(--h-low);color:var(--h-low-fg)} .hc.mid{background:var(--h-mid);color:var(--h-low-fg)} .hc.high{background:var(--h-high);color:var(--h-high-fg)} .hc.away{background:var(--h-away);color:var(--h-away-fg)} .hc.none{background:var(--h-none);color:var(--h-none-fg)} .hc.na{background:var(--surface-2);color:var(--muted)}
+.hm-wrap{background:var(--surface);border-radius:10px;padding:12px;box-shadow:0 1px 2px rgba(15,23,42,.08)}
+.empty{background:var(--surface);border-radius:10px;padding:40px 20px;text-align:center;color:var(--muted)}
+.note{font-size:12px;color:var(--muted)}
+@media (max-width:640px){header.top{padding:12px 16px}.brand h1{font-size:15px}.search{width:100%}}
 </style>
-</head>
-<body>
 
-<div class="header">
-  <div class="logo">EMG</div>
-  <div>
-    <h1>EMG Solutions — September 2026 Schedule Availability</h1>
-    <p>Source: Proactive Schedule Tracker · 13 providers · Sep 7 – Oct 5, 2026</p>
+<header class="top">
+  <div class="brand"><div class="logo">EMG</div>
+    <div><h1 id="title">EMG Solutions — Schedule Availability</h1><p id="sub"></p></div></div>
+  <div class="kpis">
+    <div class="kpi"><b id="kA">—</b><span>Available Slots</span></div>
+    <div class="kpi"><b id="kF">—</b><span>Filled Slots</span></div>
+    <div class="kpi"><b id="kR">—</b><span>Fill Rate</span></div>
   </div>
-  <div class="hdr-pills">
-    <div class="hdr-pill"><b id="stat-avail-slots">—</b>Available Slots</div>
-    <div class="hdr-pill"><b id="stat-filled-slots">—</b>Filled Slots</div>
-    <div class="hdr-pill"><b id="stat-pct">—</b>Fill Rate</div>
-  </div>
-</div>
-
-<div class="tabs">
-  <div class="tab active" onclick="showTab('provider',this)">👤 By Provider</div>
-  <div class="tab" onclick="showTab('location',this)">📍 By Location</div>
-  <div class="tab" onclick="showTab('heatmap',this)">🔥 Availability Heatmap</div>
-</div>
-
-<!-- PROVIDER TAB -->
-<div id="tab-provider" class="content">
+</header>
+<nav class="tabs" role="tablist">
+  <button role="tab" data-v="prov" aria-selected="true">👤 By Provider</button>
+  <button role="tab" data-v="loc" aria-selected="false">📍 By Location</button>
+  <button role="tab" data-v="heat" aria-selected="false">🔥 Availability Heatmap</button>
+</nav>
+<main>
   <div class="controls">
-    <div class="week-tabs" id="week-tabs"></div>
-    <select id="p-filter-prov" onchange="renderProvider()"><option value="">All Providers</option></select>
-    <input id="p-srch" placeholder="🔍 Search provider or location…" oninput="renderProvider()" style="width:220px;">
+    <button class="btn cur" id="curBtn" type="button"></button>
+    <select class="sel" id="pastSel" aria-label="Past months"></select>
+    <span class="ctl-label">Week</span>
+    <select class="sel" id="weekSel" aria-label="Week"></select>
+    <select class="sel" id="provSel" aria-label="Provider"></select>
+    <input class="search" id="q" type="search" placeholder="🔍 Search provider or location…">
   </div>
-  <div class="legend">
-    <div class="leg"><div class="leg-sq" style="background:#22c55e"></div>Filled</div>
-    <div class="leg"><div class="leg-sq" style="background:#f97316"></div>Available</div>
-    <div class="leg"><div class="leg-sq" style="background:#7c3aed"></div>PTO / Traveling</div>
-    <div class="leg"><div class="leg-sq" style="background:#ef4444"></div>No Schedule</div>
-  </div>
-  <div id="provider-content"></div>
-</div>
-
-<!-- LOCATION TAB -->
-<div id="tab-location" class="content hidden">
-  <div class="controls">
-    <div class="week-tabs" id="week-tabs-loc"></div>
-    <input id="l-srch" placeholder="🔍 Filter locations…" oninput="renderLocation()" style="width:220px;">
-  </div>
-  <div id="location-content"></div>
-</div>
-
-<!-- HEATMAP TAB -->
-<div id="tab-heatmap" class="content hidden">
-  <div class="controls">
-    <div class="week-tabs" id="week-tabs-hm"></div>
-    <span style="font-size:0.72rem;color:#64748b;margin-left:4px;">Cells show open appointment slots. Yellow = open, Green = fully booked, Gray = PTO/no schedule.</span>
-  </div>
-  <div class="heatmap-wrap" id="heatmap-content"></div>
-</div>
-
-<div class="tip" id="tip"></div>
+  <div class="legend" id="legend"></div>
+  <div id="view"></div>
+</main>
 
 <script>
-var RAW = [{"provider": "Colby Kunkel", "week": "2026-10-05", "day": "Monday", "di": 0, "loc_am": "EMG-HVILLE", "loc_pm": "EMG-HVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Colby Kunkel", "week": "2026-10-05", "day": "Tuesday", "di": 1, "loc_am": "EMG-HVILLE", "loc_pm": "EMG-HVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Colby Kunkel", "week": "2026-10-05", "day": "Wednesday", "di": 2, "loc_am": "TOC-ATHENS", "loc_pm": "TOC-ATHENS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Colby Kunkel", "week": "2026-10-05", "day": "Thursday", "di": 3, "loc_am": "TOC-ATHENS", "loc_pm": "TOC-ATHENS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Colby Kunkel", "week": "2026-10-05", "day": "Friday", "di": 4, "loc_am": "TOC-ATHENS", "loc_pm": "TOC-ATHENS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Timothy Dau", "week": "2026-10-05", "day": "Monday", "di": 0, "loc_am": "EMERGE-ASHVILLE", "loc_pm": "EMERGE-ASHVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "noScheduleNoSlot", "available", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Timothy Dau", "week": "2026-10-05", "day": "Tuesday", "di": 1, "loc_am": "EMERGE-ASHVILLE", "loc_pm": "EMERGE-ASHVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "available", "filled", "available", "available", "available", "available"]}, {"provider": "Timothy Dau", "week": "2026-10-05", "day": "Wednesday", "di": 2, "loc_am": "EMERGE-ASHVILLE", "loc_pm": "EMERGE-ASHVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["available", "available", "available", "available", "available", "available", "available", "available", "filled"]}, {"provider": "Timothy Dau", "week": "2026-10-05", "day": "Thursday", "di": 3, "loc_am": "EMERGE-MORGANTON", "loc_pm": "EMERGE-MORGANTON", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Timothy Dau", "week": "2026-10-05", "day": "Friday", "di": 4, "loc_am": "EMERGE-ARDEN", "loc_pm": "EMERGE-ARDEN", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Benjamin Wynn", "week": "2026-10-05", "day": "Monday", "di": 0, "loc_am": "RES-KENNESAW", "loc_pm": "RES-KENNESAW", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "noScheduleNoSlot", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Benjamin Wynn", "week": "2026-10-05", "day": "Tuesday", "di": 1, "loc_am": "RES-ROSWELL", "loc_pm": "RES-ROSWELL", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Benjamin Wynn", "week": "2026-10-05", "day": "Wednesday", "di": 2, "loc_am": "RES-LAWRENCE", "loc_pm": "RES-LAWRENCE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "available"]}, {"provider": "Benjamin Wynn", "week": "2026-10-05", "day": "Thursday", "di": 3, "loc_am": "RES-DOUGLASVILLE", "loc_pm": "RES-DOUGLASVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "available", "filled", "available", "available", "filled", "filled", "available", "filled"]}, {"provider": "Benjamin Wynn", "week": "2026-10-05", "day": "Friday", "di": 4, "loc_am": "RES-CUMMING", "loc_pm": "RES-CUMMING", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Mark Simmons", "week": "2026-10-05", "day": "Monday", "di": 0, "loc_am": "EMERGE-WILMINGTON", "loc_pm": "EMERGE-WILMINGTON", "pto": false, "traveling": true, "no_sched": false, "slots": ["traveling", "traveling", "traveling", "traveling", "traveling", "filled", "filled", "filled", "filled"]}, {"provider": "Mark Simmons", "week": "2026-10-05", "day": "Tuesday", "di": 1, "loc_am": "EMERGE-WILMINGTON", "loc_pm": "EMERGE-WILMINGTON", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Mark Simmons", "week": "2026-10-05", "day": "Wednesday", "di": 2, "loc_am": "EMERGE-WILMINGTON", "loc_pm": "EMERGE-WILMINGTON", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Mark Simmons", "week": "2026-10-05", "day": "Thursday", "di": 3, "loc_am": "EMERGE-WILMINGTON", "loc_pm": "EMERGE-WILMINGTON", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Mark Simmons", "week": "2026-10-05", "day": "Friday", "di": 4, "loc_am": "EMERGE-WILMINGTON", "loc_pm": "EMERGE-WILMINGTON", "pto": false, "traveling": true, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "traveling", "traveling", "traveling", "traveling", "traveling"]}, {"provider": "John Lugo", "week": "2026-10-05", "day": "Monday", "di": 0, "loc_am": "Admin/Education", "loc_pm": "Admin/Education", "pto": false, "traveling": false, "no_sched": true, "slots": ["noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "John Lugo", "week": "2026-10-05", "day": "Tuesday", "di": 1, "loc_am": "Admin/Education", "loc_pm": "Admin/Education", "pto": false, "traveling": false, "no_sched": true, "slots": ["noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "John Lugo", "week": "2026-10-05", "day": "Wednesday", "di": 2, "loc_am": "HC-COLUMBUS", "loc_pm": "HC-COLUMBUS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "available", "filled", "noScheduleNoSlot"]}, {"provider": "John Lugo", "week": "2026-10-05", "day": "Thursday", "di": 3, "loc_am": "BW-PHENIX CITY", "loc_pm": "BW-PHENIX CITY", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "noScheduleNoSlot"]}, {"provider": "John Lugo", "week": "2026-10-05", "day": "Friday", "di": 4, "loc_am": "HC-AUBURN", "loc_pm": "HC-AUBURN", "pto": true, "traveling": false, "no_sched": false, "slots": ["pto", "filled", "filled", "filled", "filled", "filled", "filled", "available", "noScheduleNoSlot"]}, {"provider": "Darin White", "week": "2026-10-05", "day": "Monday", "di": 0, "loc_am": "Admin/Education", "loc_pm": "Admin/Education", "pto": false, "traveling": true, "no_sched": false, "slots": ["traveling", "traveling", "traveling", "traveling", "traveling", "traveling", "traveling", "traveling", "traveling"]}, {"provider": "Darin White", "week": "2026-10-05", "day": "Tuesday", "di": 1, "loc_am": "URHCS", "loc_pm": "URHCS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "noScheduleNoSlot"]}, {"provider": "Darin White", "week": "2026-10-05", "day": "Wednesday", "di": 2, "loc_am": "URHCS", "loc_pm": "URHCS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Darin White", "week": "2026-10-05", "day": "Thursday", "di": 3, "loc_am": "URHCS", "loc_pm": "URHCS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Darin White", "week": "2026-10-05", "day": "Friday", "di": 4, "loc_am": "CALLEWART", "loc_pm": "CALLEWART", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "available", "available", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "Marshall Lassiter", "week": "2026-10-05", "day": "Monday", "di": 0, "loc_am": "BBJ", "loc_pm": "BBJ", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Marshall Lassiter", "week": "2026-10-05", "day": "Tuesday", "di": 1, "loc_am": "CROTWELL", "loc_pm": "CROTWELL", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Marshall Lassiter", "week": "2026-10-05", "day": "Wednesday", "di": 2, "loc_am": "HC-MTG", "loc_pm": "HC-MTG", "pto": false, "traveling": false, "no_sched": false, "slots": ["available", "available", "filled", "filled", "filled", "filled", "available", "available", "available"]}, {"provider": "Marshall Lassiter", "week": "2026-10-05", "day": "Thursday", "di": 3, "loc_am": "HC-MTG", "loc_pm": "HC-MTG", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "available", "available", "available", "available", "available", "available", "available", "available"]}, {"provider": "Marshall Lassiter", "week": "2026-10-05", "day": "Friday", "di": 4, "loc_am": "GO-SARALAND", "loc_pm": "GO-SARALAND", "pto": false, "traveling": false, "no_sched": false, "slots": ["available", "available", "available", "available", "available", "available", "available", "available", "available"]}, {"provider": "Jedd Thorderson", "week": "2026-10-05", "day": "Monday", "di": 0, "loc_am": "BJISG", "loc_pm": "BJISG", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "noScheduleNoSlot", "filled", "filled", "noScheduleNoSlot", "filled", "filled", "filled", "filled"]}, {"provider": "Jedd Thorderson", "week": "2026-10-05", "day": "Tuesday", "di": 1, "loc_am": "TOI-GAINESVILLE", "loc_pm": "TOI-GAINESVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Jedd Thorderson", "week": "2026-10-05", "day": "Wednesday", "di": 2, "loc_am": "TOI-OCALA", "loc_pm": "TOI-OCALA", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Jedd Thorderson", "week": "2026-10-05", "day": "Thursday", "di": 3, "loc_am": "TOI-GAINESVILLE", "loc_pm": "TOI-GAINESVILLE", "pto": false, "traveling": true, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "available", "traveling"]}, {"provider": "Jedd Thorderson", "week": "2026-10-05", "day": "Friday", "di": 4, "loc_am": "HC-DUBLIN", "loc_pm": "HC-DUBLIN", "pto": false, "traveling": false, "no_sched": false, "slots": ["available", "available", "available", "available", "available", "available", "available", "available", "available"]}, {"provider": "Megan Gold", "week": "2026-10-05", "day": "Monday", "di": 0, "loc_am": "RES-COVINGTON", "loc_pm": "RES-COVINGTON", "pto": false, "traveling": false, "no_sched": false, "slots": ["available", "available", "filled", "filled", "filled", "available", "available", "available", "filled"]}, {"provider": "Megan Gold", "week": "2026-10-05", "day": "Tuesday", "di": 1, "loc_am": null, "loc_pm": null, "pto": true, "traveling": false, "no_sched": false, "slots": ["pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto"]}, {"provider": "Megan Gold", "week": "2026-10-05", "day": "Wednesday", "di": 2, "loc_am": null, "loc_pm": null, "pto": true, "traveling": false, "no_sched": false, "slots": ["pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto"]}, {"provider": "Megan Gold", "week": "2026-10-05", "day": "Thursday", "di": 3, "loc_am": null, "loc_pm": null, "pto": true, "traveling": false, "no_sched": false, "slots": ["pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto"]}, {"provider": "Megan Gold", "week": "2026-10-05", "day": "Friday", "di": 4, "loc_am": null, "loc_pm": null, "pto": true, "traveling": false, "no_sched": false, "slots": ["pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto"]}, {"provider": "John Lugo", "week": "2026-09-28", "day": "Monday", "di": 0, "loc_am": "RMC", "loc_pm": "RMC", "pto": false, "traveling": false, "no_sched": true, "slots": ["noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "John Lugo", "week": "2026-09-28", "day": "Tuesday", "di": 1, "loc_am": "BW-PHENIX CITY", "loc_pm": "BW-PHENIX CITY", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "available"]}, {"provider": "John Lugo", "week": "2026-09-28", "day": "Wednesday", "di": 2, "loc_am": "HC-MTG", "loc_pm": "HC-MTG", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "noScheduleNoSlot"]}, {"provider": "John Lugo", "week": "2026-09-28", "day": "Thursday", "di": 3, "loc_am": "SBJS", "loc_pm": "SBJS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "noScheduleNoSlot"]}, {"provider": "John Lugo", "week": "2026-09-28", "day": "Friday", "di": 4, "loc_am": "Admin/Education", "loc_pm": "Admin/Education", "pto": false, "traveling": false, "no_sched": true, "slots": ["noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "Darin White", "week": "2026-09-28", "day": "Monday", "di": 0, "loc_am": "Admin/Education", "loc_pm": "Admin/Education", "pto": false, "traveling": false, "no_sched": true, "slots": ["noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "Darin White", "week": "2026-09-28", "day": "Tuesday", "di": 1, "loc_am": "Admin/Education", "loc_pm": "Admin/Education", "pto": false, "traveling": false, "no_sched": true, "slots": ["noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "Darin White", "week": "2026-09-28", "day": "Wednesday", "di": 2, "loc_am": "HC-COLUMBUS", "loc_pm": "HC-COLUMBUS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Darin White", "week": "2026-09-28", "day": "Thursday", "di": 3, "loc_am": "HC-MTG", "loc_pm": "HC-MTG", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "available", "filled", "available", "filled", "available"]}, {"provider": "Darin White", "week": "2026-09-28", "day": "Friday", "di": 4, "loc_am": null, "loc_pm": null, "pto": false, "traveling": false, "no_sched": false, "slots": ["available", "filled", "available", "available", "available", "filled", "available", "available", "available"]}, {"provider": "Benjamin Wynn", "week": "2026-09-28", "day": "Monday", "di": 0, "loc_am": "RES-KENNESAW", "loc_pm": "RES-KENNESAW", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Benjamin Wynn", "week": "2026-09-28", "day": "Tuesday", "di": 1, "loc_am": "RES-ROSWELL", "loc_pm": "RES-ROSWELL", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Benjamin Wynn", "week": "2026-09-28", "day": "Wednesday", "di": 2, "loc_am": "RES-COVINGTON", "loc_pm": "RES-COVINGTON", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Benjamin Wynn", "week": "2026-09-28", "day": "Thursday", "di": 3, "loc_am": "HC-COLUMBUS", "loc_pm": "HC-COLUMBUS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "available", "available", "filled", "filled", "available", "available"]}, {"provider": "Benjamin Wynn", "week": "2026-09-28", "day": "Friday", "di": 4, "loc_am": "RES-CUMMING", "loc_pm": "RES-CUMMING", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Timothy Dau", "week": "2026-09-28", "day": "Monday", "di": 0, "loc_am": "EMERGE-ASHVILLE", "loc_pm": "EMERGE-ASHVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["available", "filled", "filled", "available", "filled", "filled", "filled", "filled", "available"]}, {"provider": "Timothy Dau", "week": "2026-09-28", "day": "Tuesday", "di": 1, "loc_am": "EMERGE-ASHVILLE", "loc_pm": "EMERGE-ASHVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "available", "available", "available", "available", "available", "available"]}, {"provider": "Timothy Dau", "week": "2026-09-28", "day": "Wednesday", "di": 2, "loc_am": "EMERGE-HICKORY", "loc_pm": "EMERGE-HICKORY", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Timothy Dau", "week": "2026-09-28", "day": "Thursday", "di": 3, "loc_am": "EMERGE-STATESVILLE", "loc_pm": "EMERGE-STATESVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Timothy Dau", "week": "2026-09-28", "day": "Friday", "di": 4, "loc_am": "EMERGE-ARDEN", "loc_pm": "EMERGE-ARDEN", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Evan Kern", "week": "2026-09-28", "day": "Monday", "di": 0, "loc_am": "TOC-HVILLE", "loc_pm": "TOC-HVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "noScheduleNoSlot", "filled", "filled", "filled", "filled"]}, {"provider": "Evan Kern", "week": "2026-09-28", "day": "Tuesday", "di": 1, "loc_am": "EMG-HVILLE", "loc_pm": "EMG-HVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Evan Kern", "week": "2026-09-28", "day": "Wednesday", "di": 2, "loc_am": "TOC-ATHENS", "loc_pm": "TOC-ATHENS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "noScheduleNoSlot", "filled", "filled", "filled", "filled"]}, {"provider": "Evan Kern", "week": "2026-09-28", "day": "Thursday", "di": 3, "loc_am": "EMG-ATHENS", "loc_pm": "EMG-ATHENS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Evan Kern", "week": "2026-09-28", "day": "Friday", "di": 4, "loc_am": "TOC-MADISON", "loc_pm": "TOC-MADISON", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "noScheduleNoSlot", "filled", "filled", "filled", "filled"]}, {"provider": "Megan Gold", "week": "2026-09-28", "day": "Monday", "di": 0, "loc_am": "RES-FAYETTEVILLE", "loc_pm": "RES-FAYETTEVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Megan Gold", "week": "2026-09-28", "day": "Tuesday", "di": 1, "loc_am": "AOA", "loc_pm": "AOA", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Megan Gold", "week": "2026-09-28", "day": "Wednesday", "di": 2, "loc_am": "RES-LAWRENCE", "loc_pm": "RES-LAWRENCE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Megan Gold", "week": "2026-09-28", "day": "Thursday", "di": 3, "loc_am": null, "loc_pm": null, "pto": true, "traveling": false, "no_sched": false, "slots": ["pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto"]}, {"provider": "Megan Gold", "week": "2026-09-28", "day": "Friday", "di": 4, "loc_am": null, "loc_pm": null, "pto": true, "traveling": false, "no_sched": false, "slots": ["pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto"]}, {"provider": "Jedd Thorderson", "week": "2026-09-28", "day": "Monday", "di": 0, "loc_am": "BJISG", "loc_pm": "BJISG", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "available", "available", "filled", "filled", "filled", "available", "available", "available"]}, {"provider": "Jedd Thorderson", "week": "2026-09-28", "day": "Tuesday", "di": 1, "loc_am": "TOI-GAINESVILLE", "loc_pm": "TOI-GAINESVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Jedd Thorderson", "week": "2026-09-28", "day": "Wednesday", "di": 2, "loc_am": "TOI-OCALA", "loc_pm": "TOI-OCALA", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Jedd Thorderson", "week": "2026-09-28", "day": "Thursday", "di": 3, "loc_am": "TOI-GAINESVILLE", "loc_pm": "TOI-GAINESVILLE", "pto": false, "traveling": true, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "traveling"]}, {"provider": "Jedd Thorderson", "week": "2026-09-28", "day": "Friday", "di": 4, "loc_am": "HC-VALDOSTA", "loc_pm": "HC-VALDOSTA", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "available", "filled"]}, {"provider": "Colby Kunkel", "week": "2026-09-28", "day": "Monday", "di": 0, "loc_am": "EMG-HVILLE", "loc_pm": "EMG-HVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "Colby Kunkel", "week": "2026-09-28", "day": "Tuesday", "di": 1, "loc_am": "TOC-ATHENS", "loc_pm": "TOC-ATHENS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Colby Kunkel", "week": "2026-09-28", "day": "Wednesday", "di": 2, "loc_am": "UOC", "loc_pm": "UOC", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Colby Kunkel", "week": "2026-09-28", "day": "Thursday", "di": 3, "loc_am": null, "loc_pm": null, "pto": true, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "available", "pto", "pto"]}, {"provider": "Colby Kunkel", "week": "2026-09-28", "day": "Friday", "di": 4, "loc_am": null, "loc_pm": null, "pto": true, "traveling": false, "no_sched": false, "slots": ["pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto"]}, {"provider": "Karah Loftin", "week": "2026-09-28", "day": "Monday", "di": 0, "loc_am": "RES-MCDONOUGH", "loc_pm": "RES-MCDONOUGH", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Karah Loftin", "week": "2026-09-28", "day": "Tuesday", "di": 1, "loc_am": "AHS-SMYRNA", "loc_pm": "AHS-SMYRNA", "pto": false, "traveling": false, "no_sched": false, "slots": ["noScheduleNoSlot", "filled", "filled", "filled", "filled", "filled", "filled", "available", "filled"]}, {"provider": "Karah Loftin", "week": "2026-09-28", "day": "Wednesday", "di": 2, "loc_am": "AHS-JOHNS CREEK", "loc_pm": "AHS-LAWRENCEVILLE", "pto": false, "traveling": true, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "traveling", "filled", "filled", "filled", "filled"]}, {"provider": "Karah Loftin", "week": "2026-09-28", "day": "Thursday", "di": 3, "loc_am": "AHS-EAST COBB", "loc_pm": "AHS-EAST COBB", "pto": false, "traveling": false, "no_sched": false, "slots": ["noScheduleNoSlot", "available", "filled", "filled", "available", "available", "available", "available", "available"]}, {"provider": "Karah Loftin", "week": "2026-09-28", "day": "Friday", "di": 4, "loc_am": "AHS-SMYRNA", "loc_pm": "AHS-SMYRNA", "pto": false, "traveling": false, "no_sched": false, "slots": ["noScheduleNoSlot", "available", "available", "filled", "available", "available", "filled", "available", "available"]}, {"provider": "Marshall Lassiter", "week": "2026-09-28", "day": "Monday", "di": 0, "loc_am": "BBJ", "loc_pm": "BBJ", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "available", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Marshall Lassiter", "week": "2026-09-28", "day": "Tuesday", "di": 1, "loc_am": "GO-FAIRHOPE", "loc_pm": "GO-FAIRHOPE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Marshall Lassiter", "week": "2026-09-28", "day": "Wednesday", "di": 2, "loc_am": "GO-MOBILE", "loc_pm": "GO-MOBILE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Marshall Lassiter", "week": "2026-09-28", "day": "Thursday", "di": 3, "loc_am": "BBJ", "loc_pm": "BBJ", "pto": false, "traveling": false, "no_sched": false, "slots": ["available", "available", "available", "available", "available", "available", "available", "available", "available"]}, {"provider": "Marshall Lassiter", "week": "2026-09-28", "day": "Friday", "di": 4, "loc_am": "GO-SARALAND", "loc_pm": "GO-SARALAND", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Marshall Lassiter", "week": "2026-09-21", "day": "Monday", "di": 0, "loc_am": "BBJ", "loc_pm": "BBJ", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "available", "available", "available", "available", "available"]}, {"provider": "Marshall Lassiter", "week": "2026-09-21", "day": "Tuesday", "di": 1, "loc_am": "CROTWELL", "loc_pm": "CROTWELL", "pto": false, "traveling": false, "no_sched": false, "slots": ["available", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Marshall Lassiter", "week": "2026-09-21", "day": "Wednesday", "di": 2, "loc_am": "HC-MTG", "loc_pm": "HC-MTG", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "available"]}, {"provider": "Marshall Lassiter", "week": "2026-09-21", "day": "Thursday", "di": 3, "loc_am": "HC-MTG", "loc_pm": "HC-MTG", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Marshall Lassiter", "week": "2026-09-21", "day": "Friday", "di": 4, "loc_am": "CROTWELL", "loc_pm": "CROTWELL", "pto": false, "traveling": false, "no_sched": false, "slots": ["available", "available", "available", "filled", "available", "filled", "filled", "filled", "available"]}, {"provider": "Daniel Trapp", "week": "2026-09-21", "day": "Monday", "di": 0, "loc_am": "BHP", "loc_pm": "BHP", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "noScheduleNoSlot"]}, {"provider": "Daniel Trapp", "week": "2026-09-21", "day": "Tuesday", "di": 1, "loc_am": "BHP", "loc_pm": "BHP", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "noScheduleNoSlot"]}, {"provider": "Daniel Trapp", "week": "2026-09-21", "day": "Wednesday", "di": 2, "loc_am": "BHP", "loc_pm": "BHP", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "noScheduleNoSlot"]}, {"provider": "Daniel Trapp", "week": "2026-09-21", "day": "Thursday", "di": 3, "loc_am": "HC-HENDERSON", "loc_pm": "HC-HENDERSON", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "available", "filled", "available", "filled", "filled", "available", "available"]}, {"provider": "Daniel Trapp", "week": "2026-09-21", "day": "Friday", "di": 4, "loc_am": "HC-LEBANON", "loc_pm": "HC-LEBANON", "pto": false, "traveling": false, "no_sched": false, "slots": ["available", "available", "filled", "noScheduleNoSlot", "noScheduleNoSlot", "filled", "available", "available", "filled"]}, {"provider": "Darin White", "week": "2026-09-21", "day": "Monday", "di": 0, "loc_am": "HC-COLUMBUS", "loc_pm": "HC-COLUMBUS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Darin White", "week": "2026-09-21", "day": "Tuesday", "di": 1, "loc_am": "SBJS", "loc_pm": "SBJS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "noScheduleNoSlot", "filled", "filled", "filled", "filled"]}, {"provider": "Darin White", "week": "2026-09-21", "day": "Wednesday", "di": 2, "loc_am": "HC-DOTHAN", "loc_pm": "HC-DOTHAN", "pto": false, "traveling": false, "no_sched": false, "slots": ["available", "filled", "filled", "available", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Darin White", "week": "2026-09-21", "day": "Thursday", "di": 3, "loc_am": "HC-MTG", "loc_pm": "HC-MTG", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Darin White", "week": "2026-09-21", "day": "Friday", "di": 4, "loc_am": "HC-COLUMBUS", "loc_pm": "HC-AUBURN", "pto": false, "traveling": true, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "traveling", "filled", "filled", "filled", "noScheduleNoSlot"]}, {"provider": "Colby Kunkel", "week": "2026-09-21", "day": "Monday", "di": 0, "loc_am": "EMG-HVILLE", "loc_pm": "EMG-HVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "available", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "Colby Kunkel", "week": "2026-09-21", "day": "Tuesday", "di": 1, "loc_am": "EMG-HVILLE", "loc_pm": "EMG-HVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Colby Kunkel", "week": "2026-09-21", "day": "Wednesday", "di": 2, "loc_am": "TOC-ATHENS", "loc_pm": "TOC-ATHENS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Colby Kunkel", "week": "2026-09-21", "day": "Thursday", "di": 3, "loc_am": "EMG-ATHENS", "loc_pm": "EMG-ATHENS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Colby Kunkel", "week": "2026-09-21", "day": "Friday", "di": 4, "loc_am": "TOC-ATHENS", "loc_pm": "TOC-ATHENS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Megan Gold", "week": "2026-09-21", "day": "Monday", "di": 0, "loc_am": "TOI-GAINESVILLE", "loc_pm": "TOI-GAINESVILLE", "pto": false, "traveling": true, "no_sched": false, "slots": ["traveling", "traveling", "traveling", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Megan Gold", "week": "2026-09-21", "day": "Tuesday", "di": 1, "loc_am": "TOI-GAINESVILLE", "loc_pm": "TOI-GAINESVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Megan Gold", "week": "2026-09-21", "day": "Wednesday", "di": 2, "loc_am": "TOI-OCALA", "loc_pm": "TOI-OCALA", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Megan Gold", "week": "2026-09-21", "day": "Thursday", "di": 3, "loc_am": "TOI-GAINESVILLE", "loc_pm": "TOI-GAINESVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Megan Gold", "week": "2026-09-21", "day": "Friday", "di": 4, "loc_am": "TOI-GAINESVILLE", "loc_pm": "TOI-GAINESVILLE", "pto": false, "traveling": true, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "traveling", "traveling", "traveling", "traveling", "traveling"]}, {"provider": "John Lugo", "week": "2026-09-21", "day": "Monday", "di": 0, "loc_am": "Admin/Education", "loc_pm": "Admin/Education", "pto": false, "traveling": false, "no_sched": true, "slots": ["noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "John Lugo", "week": "2026-09-21", "day": "Tuesday", "di": 1, "loc_am": "Admin/Education", "loc_pm": "Admin/Education", "pto": false, "traveling": false, "no_sched": true, "slots": ["noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "John Lugo", "week": "2026-09-21", "day": "Wednesday", "di": 2, "loc_am": "SBJS", "loc_pm": "SBJS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "available", "filled", "filled", "filled", "filled", "noScheduleNoSlot"]}, {"provider": "John Lugo", "week": "2026-09-21", "day": "Thursday", "di": 3, "loc_am": "SBJS", "loc_pm": "SBJS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "noScheduleNoSlot"]}, {"provider": "John Lugo", "week": "2026-09-21", "day": "Friday", "di": 4, "loc_am": "Admin/Education", "loc_pm": "Admin/Education", "pto": false, "traveling": false, "no_sched": true, "slots": ["noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "Evan Kern", "week": "2026-09-21", "day": "Monday", "di": 0, "loc_am": "Holiday", "loc_pm": "Holiday", "pto": true, "traveling": false, "no_sched": false, "slots": ["pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto"]}, {"provider": "Evan Kern", "week": "2026-09-21", "day": "Tuesday", "di": 1, "loc_am": "TOC-HVILLE", "loc_pm": "TOC-HVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "noScheduleNoSlot", "filled", "filled", "filled", "filled"]}, {"provider": "Evan Kern", "week": "2026-09-21", "day": "Wednesday", "di": 2, "loc_am": "TOC-ATHENS", "loc_pm": "TOC-ATHENS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "noScheduleNoSlot", "filled", "filled", "filled", "filled"]}, {"provider": "Evan Kern", "week": "2026-09-21", "day": "Thursday", "di": 3, "loc_am": "EMG-ATHENS", "loc_pm": "EMG-ATHENS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "available", "filled", "filled", "filled"]}, {"provider": "Evan Kern", "week": "2026-09-21", "day": "Friday", "di": 4, "loc_am": "TOC-HVILLE", "loc_pm": "TOC-HVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "noScheduleNoSlot", "filled", "filled", "filled", "filled"]}, {"provider": "Timothy Dau", "week": "2026-09-14", "day": "Monday", "di": 0, "loc_am": "EMERGE-ASHVILLE", "loc_pm": "EMERGE-ASHVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Timothy Dau", "week": "2026-09-14", "day": "Tuesday", "di": 1, "loc_am": "EMERGE-ASHVILLE", "loc_pm": "EMERGE-ASHVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "available", "filled", "filled", "available", "available", "available", "available"]}, {"provider": "Timothy Dau", "week": "2026-09-14", "day": "Wednesday", "di": 2, "loc_am": "EMERGE-ASHVILLE", "loc_pm": "EMERGE-ASHVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "available", "filled", "filled", "filled", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "Timothy Dau", "week": "2026-09-14", "day": "Thursday", "di": 3, "loc_am": "EMERGE-MORGANTON", "loc_pm": "EMERGE-MORGANTON", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "available", "filled"]}, {"provider": "Timothy Dau", "week": "2026-09-14", "day": "Friday", "di": 4, "loc_am": "EMERGE-ARDEN", "loc_pm": "EMERGE-ARDEN", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Benjamin Wynn", "week": "2026-09-21", "day": "Monday", "di": 0, "loc_am": "HC-THOMASTON", "loc_pm": "HC-THOMASTON", "pto": false, "traveling": false, "no_sched": false, "slots": ["available", "filled", "filled", "available", "available", "available", "available", "available", "available"]}, {"provider": "Benjamin Wynn", "week": "2026-09-21", "day": "Tuesday", "di": 1, "loc_am": "RES-CUMMING", "loc_pm": "RES-CUMMING", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Benjamin Wynn", "week": "2026-09-21", "day": "Wednesday", "di": 2, "loc_am": "RES-MCDONOUGH", "loc_pm": "RES-MCDONOUGH", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Benjamin Wynn", "week": "2026-09-21", "day": "Thursday", "di": 3, "loc_am": "RES-DOUGLASVILLE", "loc_pm": "RES-DOUGLASVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Benjamin Wynn", "week": "2026-09-21", "day": "Friday", "di": 4, "loc_am": "RES-AUSTELL", "loc_pm": "RES-AUSTELL", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "available", "available", "filled", "filled"]}, {"provider": "Mark Simmons", "week": "2026-09-21", "day": "Monday", "di": 0, "loc_am": "BHP", "loc_pm": "BHP", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "noScheduleNoSlot"]}, {"provider": "Mark Simmons", "week": "2026-09-21", "day": "Tuesday", "di": 1, "loc_am": "BHP", "loc_pm": "BHP", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "noScheduleNoSlot"]}, {"provider": "Mark Simmons", "week": "2026-09-21", "day": "Wednesday", "di": 2, "loc_am": "AOS", "loc_pm": "AOS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Mark Simmons", "week": "2026-09-21", "day": "Thursday", "di": 3, "loc_am": "SOS-SMYRNA", "loc_pm": "SOS-SMYRNA", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "available", "available"]}, {"provider": "Mark Simmons", "week": "2026-09-21", "day": "Friday", "di": 4, "loc_am": "NGH", "loc_pm": "NGH", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "noScheduleNoSlot"]}, {"provider": "Jedd Thorderson", "week": "2026-09-21", "day": "Monday", "di": 0, "loc_am": "BJISG", "loc_pm": "BJISG", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "available"]}, {"provider": "Jedd Thorderson", "week": "2026-09-21", "day": "Tuesday", "di": 1, "loc_am": "BJISG", "loc_pm": "BJISG", "pto": false, "traveling": false, "no_sched": false, "slots": ["available", "filled", "available", "available", "available", "available", "available", "available", "available"]}, {"provider": "Jedd Thorderson", "week": "2026-09-21", "day": "Wednesday", "di": 2, "loc_am": "HC-VALDOSTA", "loc_pm": "HC-VALDOSTA", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Jedd Thorderson", "week": "2026-09-21", "day": "Thursday", "di": 3, "loc_am": "HC-VALDOSTA", "loc_pm": "HC-VALDOSTA", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "available", "filled", "available", "available", "available"]}, {"provider": "Jedd Thorderson", "week": "2026-09-21", "day": "Friday", "di": 4, "loc_am": "HC-DUBLIN", "loc_pm": "HC-DUBLIN", "pto": false, "traveling": false, "no_sched": false, "slots": ["available", "filled", "available", "available", "available", "available", "available", "available", "available"]}, {"provider": "Karah Loftin", "week": "2026-09-21", "day": "Monday", "di": 0, "loc_am": "AHS-SMYRNA", "loc_pm": "AHS-SMYRNA", "pto": true, "traveling": false, "no_sched": false, "slots": ["pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto"]}, {"provider": "Karah Loftin", "week": "2026-09-21", "day": "Tuesday", "di": 1, "loc_am": "AHS-SMYRNA", "loc_pm": "AHS-SMYRNA", "pto": false, "traveling": false, "no_sched": false, "slots": ["noScheduleNoSlot", "available", "available", "filled", "filled", "available", "filled", "available", "filled"]}, {"provider": "Karah Loftin", "week": "2026-09-21", "day": "Wednesday", "di": 2, "loc_am": "AHS-JOHNS CREEK", "loc_pm": "AHS-LAWRENCEVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["available", "filled", "filled", "filled", "noScheduleNoSlot", "filled", "filled", "filled", "filled"]}, {"provider": "Karah Loftin", "week": "2026-09-21", "day": "Thursday", "di": 3, "loc_am": "AHS-EAST COBB", "loc_pm": "AHS-EAST COBB", "pto": false, "traveling": false, "no_sched": false, "slots": ["noScheduleNoSlot", "filled", "filled", "filled", "available", "available", "available", "filled", "available"]}, {"provider": "Karah Loftin", "week": "2026-09-21", "day": "Friday", "di": 4, "loc_am": "RES-DECATUR", "loc_pm": "RES-DECATUR", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Megan Gold", "week": "2026-09-14", "day": "Monday", "di": 0, "loc_am": "RES-FAYETTEVILLE", "loc_pm": "RES-FAYETTEVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Megan Gold", "week": "2026-09-14", "day": "Tuesday", "di": 1, "loc_am": "AOA", "loc_pm": "AOA", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "available", "available", "available", "available", "available", "available"]}, {"provider": "Megan Gold", "week": "2026-09-14", "day": "Wednesday", "di": 2, "loc_am": "RES-LAWRENCE", "loc_pm": "RES-LAWRENCE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "available", "available", "available", "available", "filled"]}, {"provider": "Megan Gold", "week": "2026-09-14", "day": "Thursday", "di": 3, "loc_am": "RES-ROSWELL", "loc_pm": "RES-ROSWELL", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Megan Gold", "week": "2026-09-14", "day": "Friday", "di": 4, "loc_am": "RES-CUMMING", "loc_pm": "RES-CUMMING", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Colby Kunkel", "week": "2026-09-14", "day": "Monday", "di": 0, "loc_am": "EMG-HVILLE", "loc_pm": "EMG-HVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "Colby Kunkel", "week": "2026-09-14", "day": "Tuesday", "di": 1, "loc_am": "EMG-HVILLE", "loc_pm": "EMG-HVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Colby Kunkel", "week": "2026-09-14", "day": "Wednesday", "di": 2, "loc_am": "UOC", "loc_pm": "UOC", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "available"]}, {"provider": "Colby Kunkel", "week": "2026-09-14", "day": "Thursday", "di": 3, "loc_am": "UOC", "loc_pm": "UOC", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "available"]}, {"provider": "Colby Kunkel", "week": "2026-09-14", "day": "Friday", "di": 4, "loc_am": "TOC-MADISON", "loc_pm": "TOC-MADISON", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Benjamin Wynn", "week": "2026-09-14", "day": "Monday", "di": 0, "loc_am": "RES-COVINGTON", "loc_pm": "RES-COVINGTON", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Benjamin Wynn", "week": "2026-09-14", "day": "Tuesday", "di": 1, "loc_am": "RES-LAWRENCE", "loc_pm": "RES-LAWRENCE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "available", "available", "available", "filled"]}, {"provider": "Benjamin Wynn", "week": "2026-09-14", "day": "Wednesday", "di": 2, "loc_am": "RES-FAYETTEVILLE", "loc_pm": "RES-FAYETTEVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Benjamin Wynn", "week": "2026-09-14", "day": "Thursday", "di": 3, "loc_am": "HC-COLUMBUS", "loc_pm": "HC-COLUMBUS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Benjamin Wynn", "week": "2026-09-14", "day": "Friday", "di": 4, "loc_am": null, "loc_pm": null, "pto": false, "traveling": false, "no_sched": false, "slots": ["available", "available", "available", "available", "available", "available", "available", "available", "available"]}, {"provider": "Mark Simmons", "week": "2026-09-14", "day": "Monday", "di": 0, "loc_am": "EMERGE-WILMINGTON", "loc_pm": "EMERGE-WILMINGTON", "pto": false, "traveling": false, "no_sched": false, "slots": ["noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "filled", "filled", "filled", "filled"]}, {"provider": "Mark Simmons", "week": "2026-09-14", "day": "Tuesday", "di": 1, "loc_am": "EMERGE-WILMINGTON", "loc_pm": "EMERGE-WILMINGTON", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Mark Simmons", "week": "2026-09-14", "day": "Wednesday", "di": 2, "loc_am": "EMERGE-WILMINGTON", "loc_pm": "EMERGE-WILMINGTON", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Mark Simmons", "week": "2026-09-14", "day": "Thursday", "di": 3, "loc_am": "EMERGE-WILMINGTON", "loc_pm": "EMERGE-WILMINGTON", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Mark Simmons", "week": "2026-09-14", "day": "Friday", "di": 4, "loc_am": "EMERGE-WILMINGTON", "loc_pm": "EMERGE-WILMINGTON", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "Timothy Dau", "week": "2026-09-14", "day": "Monday", "di": 0, "loc_am": "EMERGE-ASHVILLE", "loc_pm": "EMERGE-ASHVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "available", "available"]}, {"provider": "Timothy Dau", "week": "2026-09-14", "day": "Tuesday", "di": 1, "loc_am": "EMERGE-ASHVILLE", "loc_pm": "EMERGE-ASHVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "available", "available", "available", "available", "filled", "available", "filled", "filled"]}, {"provider": "Timothy Dau", "week": "2026-09-14", "day": "Wednesday", "di": 2, "loc_am": "EMERGE-HICKORY", "loc_pm": "EMERGE-HICKORY", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Timothy Dau", "week": "2026-09-14", "day": "Thursday", "di": 3, "loc_am": "EMERGE-STATESVILLE", "loc_pm": "EMERGE-STATESVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "available"]}, {"provider": "Timothy Dau", "week": "2026-09-14", "day": "Friday", "di": 4, "loc_am": "EMERGE-ARDEN", "loc_pm": "EMERGE-ARDEN", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "John Lugo", "week": "2026-09-14", "day": "Monday", "di": 0, "loc_am": "Admin/Education", "loc_pm": "Admin/Education", "pto": false, "traveling": false, "no_sched": true, "slots": ["noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "John Lugo", "week": "2026-09-14", "day": "Tuesday", "di": 1, "loc_am": "Admin/Education", "loc_pm": "Admin/Education", "pto": false, "traveling": false, "no_sched": true, "slots": ["noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "John Lugo", "week": "2026-09-14", "day": "Wednesday", "di": 2, "loc_am": "RMC", "loc_pm": "RMC", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "John Lugo", "week": "2026-09-14", "day": "Thursday", "di": 3, "loc_am": "BW-PHENIX CITY", "loc_pm": "BW-PHENIX CITY", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "noScheduleNoSlot"]}, {"provider": "John Lugo", "week": "2026-09-14", "day": "Friday", "di": 4, "loc_am": "EAMC-OPELIKA", "loc_pm": "EAMC-OPELIKA", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "available", "available", "noScheduleNoSlot"]}, {"provider": "Evan Kern", "week": "2026-09-14", "day": "Monday", "di": 0, "loc_am": "BHP", "loc_pm": "BHP", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "noScheduleNoSlot", "filled", "filled", "filled", "filled"]}, {"provider": "Evan Kern", "week": "2026-09-14", "day": "Tuesday", "di": 1, "loc_am": "BHP", "loc_pm": "BHP", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "noScheduleNoSlot", "filled", "filled", "filled", "filled"]}, {"provider": "Evan Kern", "week": "2026-09-14", "day": "Wednesday", "di": 2, "loc_am": "TOC-HVILLE", "loc_pm": "TOC-HVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "noScheduleNoSlot", "filled", "filled", "filled", "filled"]}, {"provider": "Evan Kern", "week": "2026-09-14", "day": "Thursday", "di": 3, "loc_am": "EMG-ATHENS", "loc_pm": "EMG-ATHENS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "available", "filled", "available", "available", "available", "available", "filled", "available"]}, {"provider": "Evan Kern", "week": "2026-09-14", "day": "Friday", "di": 4, "loc_am": "TOC-MADISON", "loc_pm": "TOC-MADISON", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "noScheduleNoSlot", "filled", "filled", "filled", "filled"]}, {"provider": "Kyle Martinos", "week": "2026-09-14", "day": "Monday", "di": 0, "loc_am": "EAMC-OPELIKA", "loc_pm": "EAMC-OPELIKA", "pto": false, "traveling": false, "no_sched": false, "slots": ["noScheduleNoSlot", "noScheduleNoSlot", "filled", "filled", "filled", "filled", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "Kyle Martinos", "week": "2026-09-14", "day": "Tuesday", "di": 1, "loc_am": "BW-AUBURN", "loc_pm": "BW-AUBURN", "pto": false, "traveling": false, "no_sched": false, "slots": ["noScheduleNoSlot", "noScheduleNoSlot", "filled", "filled", "filled", "filled", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "Kyle Martinos", "week": "2026-09-14", "day": "Wednesday", "di": 2, "loc_am": "HC-AUBURN", "loc_pm": "HC-AUBURN", "pto": false, "traveling": false, "no_sched": false, "slots": ["noScheduleNoSlot", "noScheduleNoSlot", "filled", "filled", "filled", "filled", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "Kyle Martinos", "week": "2026-09-14", "day": "Thursday", "di": 3, "loc_am": "EAMC-OPELIKA", "loc_pm": "EAMC-OPELIKA", "pto": false, "traveling": false, "no_sched": false, "slots": ["noScheduleNoSlot", "noScheduleNoSlot", "filled", "filled", "filled", "filled", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "Kyle Martinos", "week": "2026-09-14", "day": "Friday", "di": 4, "loc_am": null, "loc_pm": null, "pto": true, "traveling": false, "no_sched": false, "slots": ["pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto"]}, {"provider": "Darin White", "week": "2026-09-14", "day": "Monday", "di": 0, "loc_am": "Holiday", "loc_pm": "Holiday", "pto": true, "traveling": false, "no_sched": false, "slots": ["pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto"]}, {"provider": "Darin White", "week": "2026-09-14", "day": "Tuesday", "di": 1, "loc_am": "Admin/Education", "loc_pm": "Admin/Education", "pto": true, "traveling": false, "no_sched": false, "slots": ["pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto"]}, {"provider": "Darin White", "week": "2026-09-14", "day": "Wednesday", "di": 2, "loc_am": "Admin/Education", "loc_pm": "Admin/Education", "pto": true, "traveling": false, "no_sched": false, "slots": ["pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto", "noScheduleNoSlot"]}, {"provider": "Darin White", "week": "2026-09-14", "day": "Thursday", "di": 3, "loc_am": "HC-COLUMBUS", "loc_pm": "HC-COLUMBUS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Darin White", "week": "2026-09-14", "day": "Friday", "di": 4, "loc_am": "HC-COLUMBUS", "loc_pm": "HC-COLUMBUS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "available", "filled", "filled", "filled", "filled"]}, {"provider": "Marshall Lassiter", "week": "2026-09-14", "day": "Monday", "di": 0, "loc_am": "BBJ", "loc_pm": "BBJ", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Marshall Lassiter", "week": "2026-09-14", "day": "Tuesday", "di": 1, "loc_am": "GO-FAIRHOPE", "loc_pm": "GO-FAIRHOPE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Marshall Lassiter", "week": "2026-09-14", "day": "Wednesday", "di": 2, "loc_am": "GO-MOBILE", "loc_pm": "GO-MOBILE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Marshall Lassiter", "week": "2026-09-14", "day": "Thursday", "di": 3, "loc_am": "BBJ", "loc_pm": "BBJ", "pto": false, "traveling": false, "no_sched": false, "slots": ["available", "available", "available", "available", "available", "available", "available", "available", "available"]}, {"provider": "Marshall Lassiter", "week": "2026-09-14", "day": "Friday", "di": 4, "loc_am": "GO-SARALAND", "loc_pm": "GO-SARALAND", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Karah Loftin", "week": "2026-09-14", "day": "Monday", "di": 0, "loc_am": "RES-MCDONOUGH", "loc_pm": "RES-MCDONOUGH", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Karah Loftin", "week": "2026-09-14", "day": "Tuesday", "di": 1, "loc_am": "AHS-SMYRNA", "loc_pm": "AHS-SMYRNA", "pto": false, "traveling": false, "no_sched": false, "slots": ["noScheduleNoSlot", "available", "filled", "filled", "filled", "filled", "available", "available", "available"]}, {"provider": "Karah Loftin", "week": "2026-09-14", "day": "Wednesday", "di": 2, "loc_am": "AHS-JOHNS CREEK", "loc_pm": "AHS-LAWRENCEVILLE", "pto": false, "traveling": true, "no_sched": false, "slots": ["available", "available", "available", "available", "traveling", "filled", "filled", "filled", "filled"]}, {"provider": "Karah Loftin", "week": "2026-09-14", "day": "Thursday", "di": 3, "loc_am": "AHS-EAST COBB", "loc_pm": "AHS-EAST COBB", "pto": false, "traveling": false, "no_sched": false, "slots": ["noScheduleNoSlot", "filled", "filled", "available", "available", "available", "available", "available", "available"]}, {"provider": "Karah Loftin", "week": "2026-09-14", "day": "Friday", "di": 4, "loc_am": null, "loc_pm": null, "pto": true, "traveling": false, "no_sched": false, "slots": ["pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto", "pto"]}, {"provider": "Jedd Thorderson", "week": "2026-09-14", "day": "Monday", "di": 0, "loc_am": "BJISG", "loc_pm": "BJISG", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Jedd Thorderson", "week": "2026-09-14", "day": "Tuesday", "di": 1, "loc_am": "TOI-GAINESVILLE", "loc_pm": "TOI-GAINESVILLE", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Jedd Thorderson", "week": "2026-09-14", "day": "Wednesday", "di": 2, "loc_am": "TOI-OCALA", "loc_pm": "TOI-OCALA", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Jedd Thorderson", "week": "2026-09-14", "day": "Thursday", "di": 3, "loc_am": "TOI-GAINESVILLE", "loc_pm": "TOI-GAINESVILLE", "pto": false, "traveling": true, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "filled", "filled", "traveling"]}, {"provider": "Jedd Thorderson", "week": "2026-09-14", "day": "Friday", "di": 4, "loc_am": "HC-VALDOSTA", "loc_pm": "HC-VALDOSTA", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "filled", "filled", "filled", "available", "available", "available"]}, {"provider": "Daniel Trapp", "week": "2026-09-07", "day": "Monday", "di": 0, "loc_am": "HC-STONECREST", "loc_pm": "HC-STONECREST", "pto": false, "traveling": false, "no_sched": false, "slots": ["available", "available", "available", "available", "available", "available", "available", "available", "available"]}, {"provider": "Daniel Trapp", "week": "2026-09-07", "day": "Tuesday", "di": 1, "loc_am": null, "loc_pm": null, "pto": false, "traveling": false, "no_sched": true, "slots": ["noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot", "noScheduleNoSlot"]}, {"provider": "Daniel Trapp", "week": "2026-09-07", "day": "Wednesday", "di": 2, "loc_am": "WTBJ-PARIS", "loc_pm": "WTBJ-PARIS", "pto": false, "traveling": false, "no_sched": false, "slots": ["filled", "filled", "filled", "available", "filled", "filled", "filled", "filled", "filled"]}, {"provider": "Daniel Trapp", "week": "2026-09-07", "day": "Thursday", "di": 3, "loc_am": "WTBJ-JACKSON", "loc_pm": "WTBJ-JACKSON", "pto": false, "traveling": false, "no_sched": false, "slots": ["available", "available", "filled", "available", "available", "available", "available", "filled", "available"]}, {"provider": "Daniel Trapp", "week": "2026-09-07", "day": "Friday", "di": 4, "loc_am": "HC-SKYLINE", "loc_pm": "HC-SKYLINE", "pto": false, "traveling": false, "no_sched": false, "slots": ["available", "available", "available", "filled", "available", "available", "available", "available", "available"]}];
+const DATA = [{"p":"Benjamin Wynn","w":"2026-09-14","days":[{"am":"RES-COVINGTON","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"RES-LAWRENCE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","available","available","available","filled"]},{"am":"RES-FAYETTEVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"HC-COLUMBUS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"","split":false,"pm":"","s":["available","available","available","available","available","available","available","available","available"]}]},{"p":"Colby Kunkel","w":"2026-09-14","days":[{"am":"EMG-HVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","noScheduleNoSlot","noScheduleNoSlot"]},{"am":"EMG-HVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"UOC","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","available"]},{"am":"UOC","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","available"]},{"am":"TOC-MADISON","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]}]},{"p":"Daniel Trapp","w":"2026-09-14","days":[{"am":"HC-STONECREST","split":false,"pm":"","s":["available","available","available","available","available","available","available","available","available"]},{"am":"","split":false,"pm":"","s":["blank","blank","blank","blank","blank","blank","blank","blank","blank"]},{"am":"WTBJ-PARIS","split":false,"pm":"","s":["filled","filled","filled","available","filled","filled","filled","filled","filled"]},{"am":"WTBJ-JACKSON","split":false,"pm":"","s":["available","available","filled","available","available","available","available","filled","available"]},{"am":"HC-SKYLINE","split":false,"pm":"","s":["available","available","available","filled","available","available","available","available","available"]}]},{"p":"Darin White","w":"2026-09-14","days":[{"am":"Holiday","split":false,"pm":"","s":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]},{"am":"Admin/Education","split":false,"pm":"","s":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]},{"am":"Admin/Education","split":false,"pm":"","s":["pto","pto","pto","pto","pto","pto","pto","pto","blank"]},{"am":"HC-COLUMBUS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"HC-COLUMBUS","split":false,"pm":"","s":["filled","filled","filled","filled","available","filled","filled","filled","filled"]}]},{"p":"Evan Kern","w":"2026-09-14","days":[{"am":"BHP","split":false,"pm":"","s":["filled","filled","filled","filled","noScheduleNoSlot","filled","filled","filled","filled"]},{"am":"BHP","split":false,"pm":"","s":["filled","filled","filled","filled","noScheduleNoSlot","filled","filled","filled","filled"]},{"am":"TOC-HVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","noScheduleNoSlot","filled","filled","filled","filled"]},{"am":"EMG-ATHENS","split":false,"pm":"","s":["filled","available","filled","available","available","available","available","filled","available"]},{"am":"TOC-MADISON","split":false,"pm":"","s":["filled","filled","filled","filled","noScheduleNoSlot","filled","filled","filled","filled"]}]},{"p":"Jedd Thorderson","w":"2026-09-14","days":[{"am":"BJISG","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"TOI-GAINESVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"TOI-OCALA","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"TOI-GAINESVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","traveling"]},{"am":"HC-VALDOSTA","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","available","available","available"]}]},{"p":"John Lugo","w":"2026-09-14","days":[{"am":"Admin/Education","split":false,"pm":"","s":["blank","blank","blank","blank","blank","blank","blank","blank","blank"]},{"am":"Admin/Education","split":false,"pm":"","s":["blank","blank","blank","blank","blank","blank","blank","blank","blank"]},{"am":"RMC","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"BW-PHENIX CITY","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","noScheduleNoSlot"]},{"am":"EAMC-OPELIKA","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","available","available","noScheduleNoSlot"]}]},{"p":"Karah Loftin","w":"2026-09-14","days":[{"am":"RES-MCDONOUGH","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"AHS-SMYRNA","split":false,"pm":"","s":["blank","available","filled","filled","filled","filled","available","available","available"]},{"am":"AHS-JOHNS CREEK","split":true,"pm":"AHS-LAWRENCEVILLE","s":["available","available","available","available","traveling","filled","filled","filled","filled"]},{"am":"AHS-EAST COBB","split":false,"pm":"","s":["blank","filled","filled","available","available","available","available","available","available"]},{"am":"","split":false,"pm":"","s":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]}]},{"p":"Kyle Martinos","w":"2026-09-14","days":[{"am":"EAMC-OPELIKA","split":false,"pm":"","s":["noScheduleNoSlot","noScheduleNoSlot","filled","filled","filled","filled","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot"]},{"am":"BW-AUBURN","split":false,"pm":"","s":["noScheduleNoSlot","noScheduleNoSlot","filled","filled","filled","filled","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot"]},{"am":"HC-AUBURN","split":false,"pm":"","s":["noScheduleNoSlot","noScheduleNoSlot","filled","filled","filled","filled","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot"]},{"am":"EAMC-OPELIKA","split":false,"pm":"","s":["noScheduleNoSlot","noScheduleNoSlot","filled","filled","filled","filled","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot"]},{"am":"","split":false,"pm":"","s":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]}]},{"p":"Mark Simmons","w":"2026-09-14","days":[{"am":"EMERGE-WILMINGTON","split":false,"pm":"","s":["noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","filled","filled","filled","filled"]},{"am":"EMERGE-WILMINGTON","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"EMERGE-WILMINGTON","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"EMERGE-WILMINGTON","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"EMERGE-WILMINGTON","split":false,"pm":"","s":["filled","filled","filled","filled","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot"]}]},{"p":"Marshall Lassiter","w":"2026-09-14","days":[{"am":"BBJ","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"GO-FAIRHOPE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"GO-MOBILE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"BBJ","split":false,"pm":"","s":["available","available","available","available","available","available","available","available","available"]},{"am":"GO-SARALAND","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]}]},{"p":"Megan Gold","w":"2026-09-14","days":[{"am":"RES-FAYETTEVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"AOA","split":false,"pm":"","s":["filled","filled","filled","available","available","available","available","available","available"]},{"am":"RES-LAWRENCE","split":false,"pm":"","s":["filled","filled","filled","filled","available","available","available","available","filled"]},{"am":"RES-ROSWELL","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"RES-CUMMING","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]}]},{"p":"Timothy Dau","w":"2026-09-14","days":[{"am":"EMERGE-ASHVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"EMERGE-ASHVILLE","split":false,"pm":"","s":["filled","filled","available","filled","filled","available","available","available","available"]},{"am":"EMERGE-ASHVILLE","split":false,"pm":"","s":["filled","filled","available","filled","filled","filled","blank","blank","blank"]},{"am":"EMERGE-MORGANTON","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","available","filled"]},{"am":"EMERGE-ARDEN","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]}]},{"p":"Benjamin Wynn","w":"2026-09-21","days":[{"am":"HC-THOMASTON","split":false,"pm":"","s":["available","filled","filled","available","available","available","available","available","available"]},{"am":"RES-CUMMING","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"RES-MCDONOUGH","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"RES-DOUGLASVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"RES-AUSTELL","split":false,"pm":"","s":["filled","filled","filled","filled","filled","available","available","filled","filled"]}]},{"p":"Colby Kunkel","w":"2026-09-21","days":[{"am":"EMG-HVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","available","noScheduleNoSlot","noScheduleNoSlot"]},{"am":"EMG-HVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"TOC-ATHENS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"EMG-ATHENS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"TOC-ATHENS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]}]},{"p":"Daniel Trapp","w":"2026-09-21","days":[{"am":"BHP","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","blank"]},{"am":"BHP","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","blank"]},{"am":"BHP","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","blank"]},{"am":"HC-HENDERSON","split":false,"pm":"","s":["filled","filled","available","filled","available","filled","filled","available","available"]},{"am":"HC-LEBANON","split":false,"pm":"","s":["available","available","filled","blank","blank","filled","available","available","filled"]}]},{"p":"Darin White","w":"2026-09-21","days":[{"am":"HC-COLUMBUS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"SBJS","split":false,"pm":"","s":["filled","filled","filled","filled","blank","filled","filled","filled","filled"]},{"am":"HC-DOTHAN","split":false,"pm":"","s":["available","filled","filled","available","filled","filled","filled","filled","filled"]},{"am":"HC-MTG","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"HC-COLUMBUS","split":true,"pm":"HC-AUBURN","s":["filled","filled","filled","filled","traveling","filled","filled","filled","noScheduleNoSlot"]}]},{"p":"Evan Kern","w":"2026-09-21","days":[{"am":"Holiday","split":false,"pm":"","s":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]},{"am":"TOC-HVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","noScheduleNoSlot","filled","filled","filled","filled"]},{"am":"TOC-ATHENS","split":false,"pm":"","s":["filled","filled","filled","filled","noScheduleNoSlot","filled","filled","filled","filled"]},{"am":"EMG-ATHENS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","available","filled","filled","filled"]},{"am":"TOC-HVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","noScheduleNoSlot","filled","filled","filled","filled"]}]},{"p":"Jedd Thorderson","w":"2026-09-21","days":[{"am":"BJISG","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","available"]},{"am":"BJISG","split":false,"pm":"","s":["available","filled","available","available","available","available","available","available","available"]},{"am":"HC-VALDOSTA","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"HC-VALDOSTA","split":false,"pm":"","s":["filled","filled","filled","filled","available","filled","available","available","available"]},{"am":"HC-DUBLIN","split":false,"pm":"","s":["available","filled","available","available","available","available","available","available","available"]}]},{"p":"John Lugo","w":"2026-09-21","days":[{"am":"Admin/Education","split":false,"pm":"","s":["blank","blank","blank","blank","blank","blank","blank","blank","blank"]},{"am":"Admin/Education","split":false,"pm":"","s":["blank","blank","blank","blank","blank","blank","blank","blank","blank"]},{"am":"SBJS","split":false,"pm":"","s":["filled","filled","filled","available","filled","filled","filled","filled","noScheduleNoSlot"]},{"am":"SBJS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","noScheduleNoSlot"]},{"am":"Admin/Education","split":false,"pm":"","s":["blank","blank","blank","blank","blank","blank","blank","blank","blank"]}]},{"p":"Karah Loftin","w":"2026-09-21","days":[{"am":"AHS-SMYRNA","split":false,"pm":"","s":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]},{"am":"AHS-SMYRNA","split":false,"pm":"","s":["noScheduleNoSlot","available","available","filled","filled","available","filled","available","filled"]},{"am":"AHS-JOHNS CREEK","split":true,"pm":"AHS-LAWRENCEVILLE","s":["available","filled","filled","filled","noScheduleNoSlot","filled","filled","filled","filled"]},{"am":"AHS-EAST COBB","split":false,"pm":"","s":["noScheduleNoSlot","filled","filled","filled","available","available","available","filled","available"]},{"am":"RES-DECATUR","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]}]},{"p":"Mark Simmons","w":"2026-09-21","days":[{"am":"BHP","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","noScheduleNoSlot"]},{"am":"BHP","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","noScheduleNoSlot"]},{"am":"AOS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"SOS-SMYRNA","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","available","available"]},{"am":"NGH","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","noScheduleNoSlot"]}]},{"p":"Marshall Lassiter","w":"2026-09-21","days":[{"am":"BBJ","split":false,"pm":"","s":["filled","filled","filled","filled","available","available","available","available","available"]},{"am":"CROTWELL","split":false,"pm":"","s":["available","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"HC-MTG","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","available"]},{"am":"HC-MTG","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"CROTWELL","split":false,"pm":"","s":["available","available","available","filled","available","filled","filled","filled","available"]}]},{"p":"Megan Gold","w":"2026-09-21","days":[{"am":"TOI-GAINESVILLE","split":false,"pm":"","s":["traveling","traveling","traveling","filled","filled","filled","filled","filled","filled"]},{"am":"TOI-GAINESVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"TOI-OCALA","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"TOI-GAINESVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"TOI-GAINESVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","traveling","traveling","traveling","traveling","traveling"]}]},{"p":"Benjamin Wynn","w":"2026-09-28","days":[{"am":"RES-KENNESAW","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"RES-ROSWELL","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"RES-COVINGTON","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"HC-COLUMBUS","split":false,"pm":"","s":["filled","filled","filled","available","available","filled","filled","available","available"]},{"am":"RES-CUMMING","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]}]},{"p":"Colby Kunkel","w":"2026-09-28","days":[{"am":"EMG-HVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","noScheduleNoSlot","noScheduleNoSlot"]},{"am":"TOC-ATHENS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"UOC","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","available","pto","pto"]},{"am":"","split":false,"pm":"","s":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]}]},{"p":"Darin White","w":"2026-09-28","days":[{"am":"Admin/Education","split":false,"pm":"","s":["noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot"]},{"am":"Admin/Education","split":false,"pm":"","s":["noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot","noScheduleNoSlot"]},{"am":"HC-COLUMBUS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"HC-MTG","split":false,"pm":"","s":["filled","filled","filled","filled","available","filled","available","filled","available"]},{"am":"","split":false,"pm":"","s":["available","filled","available","available","available","filled","available","available","available"]}]},{"p":"Evan Kern","w":"2026-09-28","days":[{"am":"TOC-HVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","noScheduleNoSlot","filled","filled","filled","filled"]},{"am":"EMG-HVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"TOC-ATHENS","split":false,"pm":"","s":["filled","filled","filled","filled","noScheduleNoSlot","filled","filled","filled","filled"]},{"am":"EMG-ATHENS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"TOC-MADISON","split":false,"pm":"","s":["filled","filled","filled","filled","noScheduleNoSlot","filled","filled","filled","filled"]}]},{"p":"Jedd Thorderson","w":"2026-09-28","days":[{"am":"BJISG","split":false,"pm":"","s":["filled","available","available","filled","filled","filled","available","available","available"]},{"am":"TOI-GAINESVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"TOI-OCALA","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"TOI-GAINESVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","traveling"]},{"am":"HC-VALDOSTA","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","available","filled"]}]},{"p":"John Lugo","w":"2026-09-28","days":[{"am":"RMC","split":false,"pm":"","s":["blank","blank","blank","blank","blank","blank","blank","blank","blank"]},{"am":"BW-PHENIX CITY","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","available"]},{"am":"HC-MTG","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","noScheduleNoSlot"]},{"am":"SBJS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","noScheduleNoSlot"]},{"am":"Admin/Education","split":false,"pm":"","s":["blank","blank","blank","blank","blank","blank","blank","blank","blank"]}]},{"p":"Karah Loftin","w":"2026-09-28","days":[{"am":"RES-MCDONOUGH","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"AHS-SMYRNA","split":false,"pm":"","s":["blank","filled","filled","filled","filled","filled","filled","available","filled"]},{"am":"AHS-JOHNS CREEK","split":true,"pm":"AHS-LAWRENCEVILLE","s":["filled","filled","filled","filled","traveling","filled","filled","filled","filled"]},{"am":"AHS-EAST COBB","split":false,"pm":"","s":["blank","available","filled","filled","available","available","available","available","available"]},{"am":"AHS-SMYRNA","split":false,"pm":"","s":["blank","available","available","filled","available","available","filled","available","available"]}]},{"p":"Marshall Lassiter","w":"2026-09-28","days":[{"am":"BBJ","split":false,"pm":"","s":["filled","available","filled","filled","filled","filled","filled","filled","filled"]},{"am":"GO-FAIRHOPE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"GO-MOBILE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"BBJ","split":false,"pm":"","s":["available","available","available","available","available","available","available","available","available"]},{"am":"GO-SARALAND","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]}]},{"p":"Megan Gold","w":"2026-09-28","days":[{"am":"RES-FAYETTEVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"AOA","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"RES-LAWRENCE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"","split":false,"pm":"","s":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]},{"am":"","split":false,"pm":"","s":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]}]},{"p":"Timothy Dau","w":"2026-09-28","days":[{"am":"EMERGE-ASHVILLE","split":false,"pm":"","s":["available","filled","filled","available","filled","filled","filled","filled","available"]},{"am":"EMERGE-ASHVILLE","split":false,"pm":"","s":["filled","filled","filled","available","available","available","available","available","available"]},{"am":"EMERGE-HICKORY","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"EMERGE-STATESVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"EMERGE-ARDEN","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]}]},{"p":"Benjamin Wynn","w":"2026-10-05","days":[{"am":"RES-KENNESAW","split":false,"pm":"","s":["filled","noScheduleNoSlot","filled","filled","filled","filled","filled","filled","filled"]},{"am":"RES-ROSWELL","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"RES-LAWRENCE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","available"]},{"am":"RES-DOUGLASVILLE","split":false,"pm":"","s":["filled","available","filled","available","available","filled","filled","available","filled"]},{"am":"RES-CUMMING","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]}]},{"p":"Colby Kunkel","w":"2026-10-05","days":[{"am":"EMG-HVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"EMG-HVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"TOC-ATHENS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"TOC-ATHENS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"TOC-ATHENS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]}]},{"p":"Darin White","w":"2026-10-05","days":[{"am":"Admin/Education","split":false,"pm":"","s":["traveling","traveling","traveling","traveling","traveling","traveling","traveling","traveling","traveling"]},{"am":"URHCS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","blank"]},{"am":"URHCS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"URHCS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"CALLEWART","split":false,"pm":"","s":["filled","filled","available","available","blank","blank","blank","blank","blank"]}]},{"p":"Evan Kern","w":"2026-10-05","days":[{"am":"EMG-HVILLE","split":false,"pm":"","s":["available","available","available","available","available","available","available","noScheduleNoSlot","noScheduleNoSlot"]},{"am":"BHP","split":false,"pm":"","s":["filled","filled","filled","filled","noScheduleNoSlot","filled","filled","filled","noScheduleNoSlot"]},{"am":"BHP","split":false,"pm":"","s":["filled","filled","filled","filled","noScheduleNoSlot","filled","filled","filled","noScheduleNoSlot"]},{"am":"EMG-ATHENS","split":false,"pm":"","s":["available","filled","available","available","available","filled","available","available","filled"]},{"am":"TOC-HVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","noScheduleNoSlot","filled","filled","filled","filled"]}]},{"p":"Jedd Thorderson","w":"2026-10-05","days":[{"am":"BJISG","split":false,"pm":"","s":["filled","noScheduleNoSlot","filled","filled","noScheduleNoSlot","filled","filled","filled","filled"]},{"am":"TOI-GAINESVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"TOI-OCALA","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"TOI-GAINESVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","available","traveling"]},{"am":"HC-DUBLIN","split":false,"pm":"","s":["available","available","available","available","available","available","available","available","available"]}]},{"p":"John Lugo","w":"2026-10-05","days":[{"am":"Admin/Education","split":false,"pm":"","s":["blank","blank","blank","blank","blank","blank","blank","blank","blank"]},{"am":"Admin/Education","split":false,"pm":"","s":["blank","blank","blank","blank","blank","blank","blank","blank","blank"]},{"am":"HC-COLUMBUS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","available","filled","noScheduleNoSlot"]},{"am":"BW-PHENIX CITY","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","noScheduleNoSlot"]},{"am":"HC-AUBURN","split":false,"pm":"","s":["pto","filled","filled","filled","filled","filled","filled","available","noScheduleNoSlot"]}]},{"p":"Karah Loftin","w":"2026-10-05","days":[{"am":"RES-MCDONOUGH","split":false,"pm":"","s":["filled","noScheduleNoSlot","filled","filled","filled","filled","filled","filled","filled"]},{"am":"","split":false,"pm":"","s":["noScheduleNoSlot","filled","filled","available","available","filled","filled","filled","filled"]},{"am":"AHS-JOHNS CREEK","split":true,"pm":"AHS-LAWRENCEVILLE","s":["filled","filled","filled","filled","traveling","available","filled","filled","filled"]},{"am":"AHS-EAST COBB","split":false,"pm":"","s":["noScheduleNoSlot","available","filled","available","available","available","filled","filled","filled"]},{"am":"AHS-SMYRNA","split":false,"pm":"","s":["traveling","available","available","filled","available","available","available","filled","filled"]}]},{"p":"Mark Simmons","w":"2026-10-05","days":[{"am":"EMERGE-WILMINGTON","split":false,"pm":"","s":["traveling","traveling","traveling","traveling","traveling","filled","filled","filled","filled"]},{"am":"EMERGE-WILMINGTON","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"EMERGE-WILMINGTON","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"EMERGE-WILMINGTON","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"EMERGE-WILMINGTON","split":false,"pm":"","s":["filled","filled","filled","filled","traveling","traveling","traveling","traveling","traveling"]}]},{"p":"Marshall Lassiter","w":"2026-10-05","days":[{"am":"BBJ","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"CROTWELL","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"HC-MTG","split":false,"pm":"","s":["available","available","filled","filled","filled","filled","available","available","available"]},{"am":"HC-MTG","split":false,"pm":"","s":["filled","available","available","available","available","available","available","available","available"]},{"am":"GO-SARALAND","split":false,"pm":"","s":["available","available","available","available","available","available","available","available","available"]}]},{"p":"Megan Gold","w":"2026-10-05","days":[{"am":"RES-COVINGTON","split":false,"pm":"","s":["available","available","filled","filled","filled","available","available","available","filled"]},{"am":"","split":false,"pm":"","s":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]},{"am":"","split":false,"pm":"","s":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]},{"am":"","split":false,"pm":"","s":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]},{"am":"","split":false,"pm":"","s":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]}]},{"p":"Timothy Dau","w":"2026-10-05","days":[{"am":"EMERGE-ASHVILLE","split":false,"pm":"","s":["filled","noScheduleNoSlot","available","filled","filled","filled","filled","filled","filled"]},{"am":"EMERGE-ASHVILLE","split":false,"pm":"","s":["filled","filled","filled","available","filled","available","available","available","available"]},{"am":"EMERGE-ASHVILLE","split":false,"pm":"","s":["available","available","available","available","available","available","available","available","filled"]},{"am":"EMERGE-MORGANTON","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"EMERGE-ARDEN","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]}]},{"p":"Colby Kunkel","w":"2026-10-12","days":[{"am":"TOC-HVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"TOC-HVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"UOC","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"UOC","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"TOC-MADISON","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]}]},{"p":"Drayton Perkins","w":"2026-10-12","days":[{"am":"HUEGA-ALPHA","split":false,"pm":"","s":["filled","filled","filled","filled","noScheduleNoSlot","filled","available","available","available"]},{"am":"HUEGA-ATL","split":false,"pm":"","s":["filled","filled","filled","filled","traveling","available","available","filled","filled"]},{"am":"RES-MCDONOUGH","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"RES-FAYETTEVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","available","available","filled","available","filled"]},{"am":"HC-COLUMBUS","split":false,"pm":"","s":["filled","filled","filled","filled","available","filled","filled","filled","available"]}]},{"p":"Evan Kern","w":"2026-10-12","days":[{"am":"EMG-HVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","noScheduleNoSlot","noScheduleNoSlot"]},{"am":"EMG-HVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","noScheduleNoSlot","noScheduleNoSlot"]},{"am":"TOC-ATHENS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"EMG-ATHENS","split":false,"pm":"","s":["filled","filled","filled","filled","filled","available","available","available","filled"]},{"am":"TOC-MADISON","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]}]},{"p":"Jedd Thorderson","w":"2026-10-12","days":[{"am":"BJISG","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"BJISG","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"BJISG","split":false,"pm":"","s":["available","available","available","available","available","available","available","available","available"]},{"am":"HC-VALDOSTA","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","available","available"]},{"am":"HC-VALDOSTA","split":false,"pm":"","s":["filled","available","available","available","available","available","available","available","available"]}]},{"p":"John Lugo","w":"2026-10-12","days":[{"am":"Admin/Education","split":false,"pm":"","s":["blank","blank","blank","blank","blank","blank","blank","blank","blank"]},{"am":"BW-AUBURN","split":false,"pm":"","s":["pto","pto","pto","filled","filled","filled","filled","filled","noScheduleNoSlot"]},{"am":"HC-DOTHAN","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","noScheduleNoSlot"]},{"am":"","split":false,"pm":"","s":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]},{"am":"","split":false,"pm":"","s":["pto","pto","pto","pto","pto","pto","pto","pto","pto"]}]},{"p":"Karah Loftin","w":"2026-10-12","days":[{"am":"RES-FAYETTEVILLE","split":false,"pm":"","s":["filled","available","filled","filled","filled","filled","filled","filled","filled"]},{"am":"AHS-SMYRNA","split":false,"pm":"","s":["noScheduleNoSlot","available","available","available","available","available","available","filled","available"]},{"am":"AHS-JOHNS CREEK","split":true,"pm":"AHS-LAWRENCEVILLE","s":["filled","filled","filled","filled","traveling","filled","filled","filled","filled"]},{"am":"AHS-EAST COBB","split":false,"pm":"","s":["noScheduleNoSlot","filled","filled","filled","filled","filled","available","filled","filled"]},{"am":"AHS-LAWRENCEVILLE","split":false,"pm":"","s":["available","filled","available","available","traveling","filled","filled","filled","filled"]}]},{"p":"Timothy Dau","w":"2026-10-12","days":[{"am":"EMERGE-ASHVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"EMERGE-ASHVILLE","split":false,"pm":"","s":["available","filled","filled","filled","filled","filled","available","available","available"]},{"am":"EMERGE-HICKORY","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"EMERGE-STATESVILLE","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]},{"am":"EMERGE-ARDEN","split":false,"pm":"","s":["filled","filled","filled","filled","filled","filled","filled","filled","filled"]}]}];
+const SL = ['8','9','10','11a','12','1','2','3','4'];
+const DN = ['Mon','Tue','Wed','Thu','Fri'];
+const MN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const pd = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const addD = (dt,n) => new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()+n);
+const mKey = s => s.slice(0,7);
+const mLabel = k => MN[+k.slice(5,7)-1] + ' ' + k.slice(0,4);
+const wLabel = s => { const d = pd(s); return 'Wk of ' + MS[d.getMonth()] + ' ' + d.getDate(); };
+const dLabel = (w,i) => { const d = addD(pd(w), i); return DN[i] + ' ' + (d.getMonth()+1) + '/' + d.getDate(); };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const isAway = s => s==='pto' || s==='traveling';
+const isNone = s => s==='noScheduleNoSlot' || s==='blank';
 
-var SLOT_TIMES = ['8–9a','9–10a','10–11a','11a–12p','12–1p','1–2p','2–3p','3–4p','4–5p'];
-var DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
-var LOC_FULL = {
-  'AHS-EAST COBB':'Atlanta Hand Specialist – East Cobb','AHS-JOHNS CREEK':'Atlanta Hand Specialist – Johns Creek',
-  'AHS-LAWRENCEVILLE':'Atlanta Hand Specialist – Lawrenceville','AHS-SMYRNA':'Atlanta Hand Specialist – Smyrna',
-  'AOA':'Anniston Orthopaedic Associates – Anniston, AL','BBJ':'Baldwin Bone & Joint – Daphne, AL',
-  'BHP':'Baptist Health Hospital – Paducah, KY','BJISG':'Bone & Joint Inst. of South Georgia – Jesup, GA',
-  'BW-AUBURN':'Bridgeway Diagnostics – Auburn, AL','BW-PHENIX CITY':'Bridgeway Diagnostics – Phenix City, AL',
-  'CALLEWART':'Craig C. Callewart, MD – Dallas, TX','CROTWELL':'Crotwell Orthopedic Clinic – Mobile, AL',
-  'EAMC-OPELIKA':'East Alabama Medical Center – Opelika, AL','EAMC-VALLEY':'East Alabama Medical Center – Valley, AL',
-  'EMG-ATHENS':'EMG Solutions – Athens, AL','EMG-HVILLE':'EMG Solutions – Huntsville, AL',
-  'EMERGE-ARDEN':'EmergeOrtho – Arden, NC','EMERGE-ASHVILLE':'EmergeOrtho – Asheville, NC',
-  'EMERGE-HICKORY':'EmergeOrtho – Hickory, NC','EMERGE-MORGANTON':'EmergeOrtho – Morganton, NC',
-  'EMERGE-STATESVILLE':'EmergeOrtho – Statesville, NC','EMERGE-WILMINGTON':'EmergeOrtho – Wilmington (Seagate), NC',
-  'GHSE-ATL':'Georgia Hand, Shoulder & Elbow – Atlanta, GA','GHSE-MARIETTA':'Georgia Hand, Shoulder & Elbow – Marietta, GA',
-  'GO-FAIRHOPE':'Gulf Orthopaedics – Fairhope, AL','GO-MOBILE':'Gulf Orthopaedics – Mobile, AL',
-  'GO-SARALAND':'Gulf Orthopaedics – Saraland, AL','HC-ALBANY':'Hughston Clinic – Albany, GA',
-  'HC-AUBURN':'Hughston Clinic – Auburn, AL','HC-CENTENNIAL':'Hughston Clinic at TriStar Centennial – Nashville, TN',
-  'HC-COLUMBUS':'Hughston Clinic – Columbus (Main Campus), GA','HC-DOTHAN':'Hughston Clinic – Dothan, AL',
-  'HC-DUBLIN':'Hughston Clinic – Dublin, GA','HC-HENDERSON':'Hughston Clinic at TriStar Hendersonville, TN',
-  'HC-LAGRANGE':'Hughston Clinic – LaGrange, GA','HC-LEBANON':'Hughston Clinic – Lebanon, TN',
-  'HC-MTG':'Hughston Clinic – Montgomery, AL','HC-SKYLINE':'Hughston Clinic at TriStar Skyline – Nashville, TN',
-  'HC-STONECREST':'Hughston Clinic at TriStar StoneCrest – Smyrna, TN','HC-THOMASTON':'Hughston Clinic – Thomaston, GA',
-  'HC-VALDOSTA':'Hughston Clinic – Valdosta, GA','HUEGA-ALPHA':'Hand & Upper Extremity Center of GA – Alpharetta, GA',
-  'HUEGA-ATL':'Hand & Upper Extremity Center of GA – Atlanta, GA','RES-AUSTELL':'Resurgens Orthopaedics – Austell, GA',
-  'RES-CUMMING':'Resurgens Orthopaedics – Cumming, GA','RES-DECATUR':'Resurgens Orthopaedics – Decatur, GA',
-  'RES-DOUGLASVILLE':'Resurgens Orthopaedics – Douglasville, GA','RES-FAYETTEVILLE':'Resurgens Orthopaedics – Fayetteville, GA',
-  'RES-KENNESAW':'Resurgens Orthopaedics – Kennesaw, GA','RES-LAWRENCE':'Resurgens Orthopaedics – Lawrenceville, GA',
-  'RES-MCDONOUGH':'Resurgens Orthopaedics – McDonough, GA','RES-ROSWELL':'Resurgens Orthopaedics – Roswell, GA',
-  'RMC':'Russell Medical Center – Alexander City, AL','SBJS':'Southern Bone & Joint Specialists – Dothan, AL',
-  'SOS-LEBANON':'Spine & Orthopedic Specialists – Lebanon, TN','TOC-ATHENS':'The Orthopaedic Center – Athens, AL',
-  'TOC-HVILLE':'The Orthopaedic Center – Huntsville, AL','TOC-MADISON':'The Orthopaedic Center – Madison, AL',
-  'TOI-GAINESVILLE':'The Orthopaedic Institute – Gainesville, FL','TOI-LECANTO':'The Orthopaedic Institute – Lecanto, FL',
-  'TOI-OCALA':'The Orthopaedic Institute – Ocala, FL','UOC':'University Orthopaedic Clinic – Tuscaloosa, AL',
-  'URHCS':'United Regional Health Care System – Wichita Falls, TX',
-  'WTBJ-JACKSON':'W. TN Bone & Joint – Jackson, TN','WTBJ-PARIS':'W. TN Bone & Joint – Paris, TN','RES-COVINGTON':'Resurgens Orthopaedics – Covington, GA',
-  'EPT':'Eufaula Physical Therapy & Wellness – Eufaula, AL',
-  'Hugh Alb':'Hughston Clinic – Albany, GA',
-  'Hugh Aub':'Hughston Clinic – Auburn, AL',
-  'Hugh Dot':'Hughston Clinic – Dothan, AL',
-  'Hugh MGM':'Hughston Clinic – Montgomery, AL',
-  'Hugh-Dub':'Hughston Clinic – Dublin, GA',
-  'Hugh-LaGra':'Hughston Clinic – LaGrange, GA',
-  'Hugh-Thom':'Hughston Clinic – Thomaston, GA',
-  'Hugh-Val':'Hughston Clinic – Valdosta, GA',
-  'Hughston':'The Hughston Clinic – Columbus, GA (Main)',
-  'HCO':'Hughston Clinic Orthopaedics – Columbus, GA',
-  'SOS-S':'Spine & Orthopedic Specialists – Lebanon, TN',
-  'AOS':'Alabama Orthopaedic Clinic – Mobile, AL',
-  'BJISG-J':'Bone & Joint Inst. of South Georgia – Jesup, GA',
-  'BJISG-W':'Bone & Joint Inst. of South Georgia – Waycross, GA',
-  'TOI - L':'The Orthopaedic Institute – Lecanto, FL',
-  'TOI - G':'The Orthopaedic Institute – Gainesville, FL',
-  'TOI - O':'The Orthopaedic Institute – Ocala, FL',
-  'NGH':'Nashville General Hospital – Nashville, TN',
-  'SBJ':'Southern Bone & Joint Specialists – Dothan, AL',
-  'WTBJ-J':'W. TN Bone & Joint – Jackson, TN',
-  'WTBJ-P':'W. TN Bone & Joint – Paris, TN',
-  'GHSE ATL':'Georgia Hand, Shoulder & Elbow – Atlanta, GA',
-  'GHSE M':'Georgia Hand, Shoulder & Elbow – Marietta, GA',
-  'HUEGA Alph':'Hand & Upper Extremity Center of GA – Alpharetta, GA',
-  'HUEGA JF':'Hand & Upper Extremity Center of GA – Johns Creek, GA',
-  'ECS':'East Cobb Surgery Center – Marietta, GA',
-  'Callewart':'Craig C. Callewart, MD – Dallas, TX',
-  'Crotwell':'Crotwell Orthopedic Clinic – Mobile, AL',
-  'Eufaula':'Eufaula Physical Therapy & Wellness – Eufaula, AL',
-  'CSMO-Atr':'Center for Sports Medicine & Orthopaedics – Chattanooga, TN',
-  'CSMO-Cl':'Center for Sports Medicine & Orthopaedics – Cleveland, TN',
-  'Emerge - Coast':'EmergeOrtho – Wilmington/Seagate, NC',
-  'EO - Morg':'EmergeOrtho – Morganton, NC',
-  'EO - State':'EmergeOrtho – Statesville, NC',
-  'EO - Hickory':'EmergeOrtho – Hickory, NC',
-  'GO-Fairhope':'Gulf Orthopaedics – Fairhope, AL',
-  'GO-Mobile':'Gulf Orthopaedics – Mobile, AL',
-  'GO-Saraland':'Gulf Orthopaedics – Saraland, AL',
-  'Holiday':'Holiday','Admin/Education':'Admin / Education Day','hcNgh':'Hughston at Nashville General Hospital',
-};
-function lf(l){ return LOC_FULL[l]||l||'—'; }
+const now = new Date();
+const CUR = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+const months = [...new Set(DATA.map(r => mKey(r.w)))].sort();
+const st = { view:'prov', month:CUR, week:'all', prov:'all', q:'' };
 
-// Weeks present — all >= Sept 1 (covers Sept + Oct + future)
-var weeks = [...new Set(RAW.map(r=>r.week))].sort().filter(w=>w>='2026-09-01');
+const $ = id => document.getElementById(id);
 
-// Derive months dynamically from data
-var months = [...new Set(weeks.map(function(w){ return w.slice(0,7); }))].sort();
-var curMonth = months[0] || '';
-var curWeek  = 'all';
-
-function weeksForMonth(m){ return weeks.filter(function(w){ return w.startsWith(m); }); }
-
-// Compute initial stats for default month
-var totalAvail=0, totalFilled=0;
-RAW.filter(function(r){return r.week.startsWith(curMonth);}).forEach(function(r){
-  r.slots.forEach(function(s){
-    if(s==='available') totalAvail++;
-    if(s==='filled') totalFilled++;
-  });
-});
-document.getElementById('stat-avail-slots').textContent = totalAvail;
-document.getElementById('stat-filled-slots').textContent = totalFilled;
-var fillRate = totalFilled+totalAvail>0 ? Math.round(totalFilled/(totalFilled+totalAvail)*100) : 0;
-document.getElementById('stat-pct').textContent = fillRate+'%';
-
-// Provider role map
-var ROLES = {
-  'Karah Loftin':'Student SPT','Jedd Thorderson':'Student SPT','Daniel Trapp':'Resident (CI)',
-  'Colby Kunkel':'Resident (CI)','John Lugo':'ECS Provider','Drayton Perkins':'Student SPT',
-  'Timothy Dau':'ECS Provider','Marshall Lassiter':'Student','Benjamin Wynn':'Student',
-  'Darin White':'ECS Provider','Evan Kern':'Resident (CI)','Kyle Martinos':'ECS Provider',
-  'Megan Gold':'Student SPT','Mark Simmons':'ECS Provider'
-};;
-var PROV_ORDER = ['Darin White','John Lugo','Mark Simmons','Kyle Martinos','Timothy Dau','Colby Kunkel','Evan Kern','Daniel Trapp','Benjamin Wynn','Marshall Lassiter','Megan Gold','Drayton Perkins','Jedd Thorderson','Karah Loftin'];
-
-function slotColor(s){ return s==='filled'?'#22c55e':s==='available'?'#f97316':s==='pto'?'#7c3aed':s==='traveling'?'#7c3aed':'#ef4444'; }
-
-// ── MONTH + WEEK TABS ──────────────────────────────────────────────────────
-var weekTabRegistry = [];
-
-function rebuildWeekTabs(){
-  curWeek = 'all';
-  weekTabRegistry.forEach(function(reg){
-    var el = document.getElementById(reg.id);
-    if(!el) return;
-    el.innerHTML = '';
-    var ws = ['all'].concat(weeksForMonth(curMonth));
-    ws.forEach(function(w){
-      var btn = document.createElement('button');
-      btn.className = 'week-btn' + (w===curWeek?' active':'');
-      btn.textContent = w==='all' ? 'All Weeks' : 'Wk of ' + new Date(w+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
-      btn.onclick = function(){
-        curWeek = w;
-        document.querySelectorAll('.week-btn').forEach(function(b){b.classList.remove('active');});
-        document.querySelectorAll('.week-btn').forEach(function(b){
-          if(b.textContent===btn.textContent) b.classList.add('active');
-        });
-        reg.fn();
-      };
-      el.appendChild(btn);
-    });
-  });
+function setupMonths(){
+  $('curBtn').innerHTML = esc(mLabel(CUR)) + '<small>Current</small>';
+  const past = months.filter(m => m < CUR).reverse();
+  const future = months.filter(m => m > CUR);
+  let h = '<option value="">Past months…</option>';
+  if (past.length) h += past.map(m => `<option value="${m}">${esc(mLabel(m))}</option>`).join('');
+  else h += '<option disabled>No past months</option>';
+  if (future.length) h += '<optgroup label="Upcoming">' + future.map(m => `<option value="${m}">${esc(mLabel(m))}</option>`).join('') + '</optgroup>';
+  $('pastSel').innerHTML = h;
 }
-
-function buildWeekTabs(containerId, fn){
-  weekTabRegistry.push({id:containerId, fn:fn});
-  // initial render handled after month tabs built
+function monthRecs(){ return DATA.filter(r => mKey(r.w) === st.month); }
+function setupWeeks(){
+  const wks = [...new Set(monthRecs().map(r => r.w))].sort();
+  $('weekSel').innerHTML = '<option value="all">All weeks</option>' + wks.map(w => `<option value="${w}">${wLabel(w)}</option>`).join('');
+  if (!wks.includes(st.week)) st.week = 'all';
+  $('weekSel').value = st.week;
+  const provs = [...new Set(monthRecs().map(r => r.p))].sort();
+  $('provSel').innerHTML = '<option value="all">All providers</option>' + provs.map(p => `<option>${esc(p)}</option>`).join('');
+  if (!provs.includes(st.prov)) st.prov = 'all';
+  $('provSel').value = st.prov;
 }
-
-function buildMonthTabs(){
-  // inject month selector above each week-tabs container
-  weekTabRegistry.forEach(function(reg, ri){
-    var weekEl = document.getElementById(reg.id);
-    if(!weekEl) return;
-    var mWrap = document.createElement('div');
-    mWrap.style.cssText = 'display:flex;gap:4px;margin-bottom:6px;';
-    months.forEach(function(m){
-      var btn = document.createElement('button');
-      btn.className = 'week-btn' + (m===curMonth?' active':'');
-      btn.style.cssText = 'background:'+(m===curMonth?'#1a3a5c':'white')+';color:'+(m===curMonth?'white':'#1a3a5c')+';border-color:#1a3a5c;font-weight:800;';
-      btn.setAttribute('data-month', m);
-      btn.textContent = new Date(m+'-15T12:00:00').toLocaleDateString('en-US',{month:'long',year:'numeric'});
-      btn.onclick = function(){
-        curMonth = m;
-        // sync all month buttons everywhere
-        document.querySelectorAll('[data-month]').forEach(function(b){
-          var active = b.getAttribute('data-month')===m;
-          b.classList.toggle('active', active);
-          b.style.background = active?'#1a3a5c':'white';
-          b.style.color      = active?'white':'#1a3a5c';
-        });
-        rebuildWeekTabs();
-        updateStats();
-        reg.fn();
-      };
-      mWrap.appendChild(btn);
-    });
-    weekEl.parentNode.insertBefore(mWrap, weekEl);
-  });
-  rebuildWeekTabs();
+function filtered(){
+  const q = st.q.trim().toLowerCase();
+  return monthRecs().filter(r =>
+    (st.week==='all' || r.w===st.week) && (st.prov==='all' || r.p===st.prov) &&
+    (!q || r.p.toLowerCase().includes(q) || r.days.some(d => (d.am+' '+d.pm).toLowerCase().includes(q))));
 }
-
-function updateStats(){
-  var d = filteredData();
-  var ta=0,tf=0;
-  d.forEach(function(r){ r.slots.forEach(function(s){ if(s==='available')ta++; if(s==='filled')tf++; }); });
-  document.getElementById('stat-avail-slots').textContent = ta;
-  document.getElementById('stat-filled-slots').textContent = tf;
-  document.getElementById('stat-pct').textContent = (ta+tf>0?Math.round(tf/(ta+tf)*100):0)+'%';
+function count(recs){
+  let a=0,f=0; recs.forEach(r => r.days.forEach(d => d.s.forEach(s => { if(s==='available')a++; else if(s==='filled')f++; })));
+  return {a,f};
 }
-
-buildWeekTabs('week-tabs',     function(){ renderProvider(); });
-buildWeekTabs('week-tabs-loc', function(){ renderLocation(); });
-buildWeekTabs('week-tabs-hm',  function(){ renderHeatmap();  });
-buildMonthTabs();
-
-// Populate provider filter
-var fp = document.getElementById('p-filter-prov');
-PROV_ORDER.forEach(function(p){ var o=document.createElement('option');o.value=p;o.textContent=p;fp.appendChild(o); });
-
-function filteredData(){
-  return RAW.filter(function(r){
-    if(!r.week.startsWith(curMonth)) return false;
-    if(curWeek!=='all' && r.week!==curWeek) return false;
-    return true;
-  });
+function header(recs){
+  const all = monthRecs();
+  const {a,f} = count(recs);
+  $('kA').textContent = a; $('kF').textContent = f;
+  $('kR').textContent = (a+f) ? Math.round(f/(a+f)*100)+'%' : '—';
+  $('title').textContent = 'EMG Solutions — ' + mLabel(st.month) + ' Schedule Availability';
+  const wks = [...new Set(all.map(r=>r.w))].sort();
+  let range = '';
+  if (wks.length){ const s = pd(wks[0]), e = addD(pd(wks[wks.length-1]),4);
+    range = ' · ' + MS[s.getMonth()]+' '+s.getDate()+' – '+MS[e.getMonth()]+' '+e.getDate()+', '+e.getFullYear(); }
+  $('sub').textContent = 'Source: Proactive Schedule Tracker · ' + new Set(all.map(r=>r.p)).size + ' providers' + range;
+  const isCur = st.month === CUR;
+  $('curBtn').classList.toggle('cur', isCur);
+  $('pastSel').classList.toggle('on', !isCur);
+  $('pastSel').value = isCur ? '' : st.month;
 }
+const LEG = '<span><i style="background:var(--filled)"></i>Filled</span><span><i style="background:var(--avail)"></i>Available</span><span><i style="background:var(--away)"></i>PTO / Traveling</span><span><i style="background:var(--none)"></i>No Schedule</span>';
+const LEG_H = '<span><i style="background:var(--h-full)"></i>Fully booked</span><span><i style="background:var(--h-low)"></i>1–2 open</span><span><i style="background:var(--h-mid)"></i>3–4 open</span><span><i style="background:var(--h-high)"></i>5+ open</span><span><i style="background:var(--h-away)"></i>PTO / Holiday / Traveling</span><span><i style="background:var(--h-none)"></i>No schedule</span>';
 
-// ── PROVIDER VIEW ──────────────────────────────────────────────────────────
-function renderProvider(){
-  var fp = document.getElementById('p-filter-prov').value;
-  var srch = document.getElementById('p-srch').value.toLowerCase();
-  var data = filteredData();
-
-  var byProv = {};
-  data.forEach(function(r){
-    if(fp && r.provider!==fp) return;
-    if(srch && !r.provider.toLowerCase().includes(srch) && !(r.loc_am||'').toLowerCase().includes(srch) && !(r.loc_pm||'').toLowerCase().includes(srch)) return;
-    if(!byProv[r.provider]) byProv[r.provider]=[];
-    byProv[r.provider].push(r);
-  });
-
-  var html='';
-  PROV_ORDER.forEach(function(prov){
-    if(!byProv[prov]) return;
-    var rows = byProv[prov];
-    // total available slots
-    var ta=0,tf=0;
-    rows.forEach(function(r){ r.slots.forEach(function(s){ if(s==='available')ta++; if(s==='filled')tf++; }); });
-
-    // group by week
-    var byWeek={};
-    rows.forEach(function(r){ if(!byWeek[r.week])byWeek[r.week]=[]; byWeek[r.week].push(r); });
-
-    html+='<div class="prov-section">';
-    html+='<div class="prov-hdr"><div><div class="prov-hdr-name">'+prov+'</div></div>';
-    html+='<div class="prov-hdr-avail">'+ta+' open slots &nbsp;·&nbsp; '+tf+' filled</div></div>';
-
-    Object.keys(byWeek).sort().forEach(function(wk){
-      var wrows = byWeek[wk].slice().sort(function(a,b){return a.di-b.di;});
-      var wlbl = new Date(wk+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
-      html+='<div class="prov-week-row"><div class="week-lbl">Wk of<br>'+wlbl+'</div>';
-
-      // fill in all 5 days
-      var dayMap={};
-      wrows.forEach(function(r){dayMap[r.di]=r;});
-      for(var di=0;di<5;di++){
-        var r=dayMap[di];
-        html+='<div class="day-col">';
-        if(!r){
-          html+='<div class="day-status-lbl status-none" style="font-size:0.58rem;margin-top:10px">—</div>';
-        } else if(r.pto){
-          html+='<div class="slot-grid">';
-          for(var i=0;i<9;i++) html+='<div class="slot-block" style="background:#7c3aed"><span class="slot-time-lbl">'+SLOT_TIMES[i].split('–')[0]+'</span></div>';
-          html+='</div><div class="day-status-lbl status-pto">PTO</div>';
-        } else if(r.no_sched && !(r.loc_am)){
-          html+='<div class="slot-grid">';
-          for(var i=0;i<9;i++) html+='<div class="slot-block" style="background:#ef4444"><span class="slot-time-lbl">'+SLOT_TIMES[i].split('–')[0]+'</span></div>';
-          html+='</div><div class="day-status-lbl status-none">No Sched</div>';
-        } else {
-          var avail=r.slots.filter(function(s){return s==='available';}).length;
-          html+='<div class="slot-grid">';
-          r.slots.forEach(function(s,si){
-            html+='<div class="slot-block" style="background:'+slotColor(s)+'" onmouseenter="showTip(event,\''+prov+'\',\''+r.day+'\',\''+wlbl+'\','+JSON.stringify(r.slots)+')" onmouseleave="hideTip()"><span class="slot-time-lbl">'+SLOT_TIMES[si].split('–')[0]+'</span></div>';
-          });
-          html+='</div>';
-          // location tags
-          var sameLocAmPm = r.loc_am===r.loc_pm;
-          if(sameLocAmPm){
-            html+='<div class="loc-tag">'+(r.loc_am||'—')+'</div>';
-          } else {
-            html+='<div class="loc-tag">AM: '+(r.loc_am||'—')+'</div>';
-            html+='<div class="loc-tag split">PM: '+(r.loc_pm||'—')+'</div>';
-          }
-          if(avail>0) html+='<div class="avail-count">'+avail+' open</div>';
-          if(r.traveling) html+='<div class="day-status-lbl status-travel" style="font-size:0.58rem">✈ Travel</div>';
-        }
-        html+='</div>';
-      }
-      html+='</div>';
-    });
-    html+='</div>';
-  });
-  if(!html) html='<div style="text-align:center;padding:40px;color:#94a3b8">No data for selection.</div>';
-  document.getElementById('provider-content').innerHTML=html;
+function dayCell(r,i){
+  const d = r.days[i];
+  const open = d.s.filter(s=>s==='available').length;
+  const allAway = d.s.every(isAway);
+  const travel = d.s.some(s=>s==='traveling') && !allAway;
+  let loc;
+  if (d.split && d.pm) loc = `AM: ${esc(d.am||'—')}<br><span class="pm">PM: ${esc(d.pm)}</span>`;
+  else loc = esc(d.am || (allAway ? (d.s.includes('pto')?'PTO':'Traveling') : '—'));
+  return `<div class="day"><div class="dname">${dLabel(r.w,i)}</div><div class="slots">${d.s.map((s,j)=>`<div class="s ${s}" title="${SL[j]} · ${s==='noScheduleNoSlot'||s==='blank'?'No schedule':s}">${SL[j]}</div>`).join('')}</div>
+    <div class="loc">${loc}</div>${open?`<div class="open">${open} open</div>`:''}${travel?'<div class="tag">✈ Travel</div>':''}</div>`;
 }
-renderProvider();
-
-// ── LOCATION VIEW ──────────────────────────────────────────────────────────
-function renderLocation(){
-  var srch = (document.getElementById('l-srch').value||'').toLowerCase();
-  var data = filteredData();
-
-  // group by location
-  var byLoc={};
-  data.forEach(function(r){
-    if(r.pto || r.no_sched) return;
-    [r.loc_am, r.loc_pm].filter(Boolean).forEach(function(loc){
-      if(loc==='Holiday'||loc==='Admin/Education') return;
-      if(!byLoc[loc]) byLoc[loc]=[];
-      // Avoid duplicate entries (same loc_am and loc_pm)
-      var key = r.provider+'|'+r.week+'|'+r.day+'|'+loc;
-      if(!byLoc[loc].find(function(x){return x._key===key;})){
-        var entry = Object.assign({},r,{_key:key,_loc:loc,_ispm: loc===r.loc_pm && loc!==r.loc_am});
-        byLoc[loc].push(entry);
+function renderProv(recs){
+  const by = {}; recs.forEach(r => (by[r.p] ||= []).push(r));
+  return Object.keys(by).sort().map(p => {
+    const rs = by[p].sort((a,b)=>a.w.localeCompare(b.w)); const {a,f} = count(rs);
+    return `<section class="card"><div class="card-h"><h2>${esc(p)}</h2><span>${a} open slots · ${f} filled</span></div>
+      <div class="scroll">${rs.map(r=>`<div class="wk"><div class="lbl">${wLabel(r.w)}</div>${[0,1,2,3,4].map(i=>dayCell(r,i)).join('')}</div>`).join('')}</div></section>`;
+  }).join('');
+}
+function renderLoc(recs){
+  const q = st.q.trim().toLowerCase();
+  const by = {};
+  const add = (loc,row) => { if(!loc) return; (by[loc] ||= []).push(row); };
+  recs.forEach(r => r.days.forEach((d,i) => {
+    if (d.s.every(s=>isAway(s)||isNone(s)) && !d.am) return;
+    if (d.split && d.pm){
+      add(d.am, {r,i,slots:d.s.slice(0,5),half:'AM'});
+      add(d.pm, {r,i,slots:d.s.slice(5),half:'PM'});
+    } else add(d.am || 'Unassigned', {r,i,slots:d.s,half:''});
+  }));
+  const locs = Object.keys(by).sort().filter(l => !q || l.toLowerCase().includes(q) || by[l].some(x=>x.r.p.toLowerCase().includes(q)));
+  if (!locs.length) return '';
+  return locs.map(l => {
+    const rows = by[l].sort((x,y)=> x.r.w.localeCompare(y.r.w) || x.i-y.i || x.r.p.localeCompare(y.r.p));
+    const tot = rows.reduce((n,x)=>n+x.slots.filter(s=>s==='available').length,0);
+    return `<section class="card"><div class="card-h"><h2>${esc(l)}</h2><span>${tot} open slots across ${rows.length} visit${rows.length===1?'':'s'}</span></div>
+    <div class="scroll"><table><thead><tr><th>Week</th><th>Day</th><th>Provider</th><th>Slots (8A–5P)</th><th>Available</th><th>Status</th></tr></thead><tbody>
+    ${rows.map(x=>{ const o = x.slots.filter(s=>s==='available').length, f = x.slots.filter(s=>s==='filled').length;
+      let pill = o ? `<span class="pill o">${o} open</span>` : f ? '<span class="pill f">Full</span>' : x.slots.some(isAway) ? `<span class="pill a">${x.slots.includes('pto')?'PTO':'Traveling'}</span>` : '<span class="pill n">No schedule</span>';
+      return `<tr><td>${wLabel(x.r.w)}</td><td>${dLabel(x.r.w,x.i)}</td><td>${esc(x.r.p)}${x.half?` <span class="note">(${x.half})</span>`:''}</td>
+      <td><span class="mini">${x.slots.map(s=>`<i class="${s}"></i>`).join('')}</span></td><td class="${o?'num-o':''}">${o}</td><td>${pill}</td></tr>`;}).join('')}
+    </tbody></table></div></section>`;
+  }).join('');
+}
+function renderHeat(recs){
+  const wks = [...new Set(recs.map(r=>r.w))].sort();
+  const provs = [...new Set(recs.map(r=>r.p))].sort();
+  if (!wks.length) return '';
+  const idx = {}; recs.forEach(r => idx[r.p+'|'+r.w] = r);
+  let h = '<div class="hm-wrap"><div class="scroll"><table class="hm"><thead><tr><th class="pn"></th>' +
+    wks.map(w=>`<th class="wkh" colspan="5">${wLabel(w)}</th>`).join('') + '</tr><tr><th class="pn">Provider</th>' +
+    wks.map(w=>[0,1,2,3,4].map(i=>`<th>${dLabel(w,i).replace(' ','<br>')}</th>`).join('')).join('') + '</tr></thead><tbody>';
+  provs.forEach(p => {
+    h += `<tr><td class="pn">${esc(p)}</td>`;
+    wks.forEach(w => { const r = idx[p+'|'+w];
+      for (let i=0;i<5;i++){
+        if (!r){ h += '<td><div class="hc na" title="No submission">·</div></td>'; continue; }
+        const s = r.days[i].s, o = s.filter(x=>x==='available').length, f = s.filter(x=>x==='filled').length;
+        let c, t;
+        if (o) { c = o<=2?'low':o<=4?'mid':'high'; t = o; }
+        else if (f) { c='full'; t='Full'; }
+        else if (s.some(isAway)) { c='away'; t = s.includes('pto') ? 'PTO' : 'Travel'; }
+        else { c='none'; t='—'; }
+        h += `<td><div class="hc ${c}" title="${esc(p)} · ${dLabel(w,i)} · ${esc(r.days[i].am||'')}">${t}</div></td>`;
       }
     });
+    h += '</tr>';
   });
-
-  var locs = Object.keys(byLoc).sort().filter(function(l){ return !srch||(l.toLowerCase().includes(srch)||(LOC_FULL[l]||'').toLowerCase().includes(srch)); });
-
-  var html='';
-  locs.forEach(function(loc){
-    var entries = byLoc[loc].slice().sort(function(a,b){ return a.week.localeCompare(b.week)||a.di-b.di||a.provider.localeCompare(b.provider); });
-    var totalAvail = 0;
-    entries.forEach(function(r){ r.slots.forEach(function(s){ if(s==='available') totalAvail++; }); });
-
-    html+='<div class="loc-card">';
-    html+='<div class="loc-card-hdr"><div><div class="loc-card-name">'+loc+'</div><div class="loc-card-sub">'+lf(loc)+'</div></div>';
-    html+='<div style="font-size:0.72rem;opacity:0.8">'+totalAvail+' open slots across '+entries.length+' visits</div></div>';
-    html+='<table class="loc-table"><thead><tr><th>Week</th><th>Day</th><th>Provider</th><th>Slots (8a–5p)</th><th>Available</th><th>Status</th></tr></thead><tbody>';
-
-    entries.forEach(function(r){
-      var avail=r.slots.filter(function(s){return s==='available';}).length;
-      var filled=r.slots.filter(function(s){return s==='filled';}).length;
-      var wlbl = new Date(r.week+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
-      var chipCls = avail>0?'chip-avail': (r.traveling?'chip-travel':(r.pto?'chip-pto':'chip-full'));
-      var chipTxt = avail>0?(avail+' open'):(r.traveling?'Traveling':(r.pto?'PTO':'Full'));
-      html+='<tr>';
-      html+='<td style="color:#64748b;white-space:nowrap">Wk '+wlbl+'</td>';
-      html+='<td style="font-weight:600">'+r.day+'</td>';
-      html+='<td>'+r.provider+(r._ispm?' <span style="font-size:0.6rem;color:#8b5cf6">(PM)</span>':'')+'</td>';
-      html+='<td><div class="mini-slots">';
-      r.slots.forEach(function(s){ html+='<div class="mini-s" style="background:'+slotColor(s)+'" title="'+SLOT_TIMES[r.slots.indexOf(s)]+'"></div>'; });
-      html+='</div></td>';
-      html+='<td>'+(avail>0?'<span class="avail-count">'+avail+'</span>':'<span style="color:#94a3b8">0</span>')+'</td>';
-      html+='<td><span class="chip '+chipCls+'">'+chipTxt+'</span></td>';
-      html+='</tr>';
-    });
-    html+='</tbody></table></div>';
-  });
-  if(!html) html='<div style="text-align:center;padding:40px;color:#94a3b8">No locations found.</div>';
-  document.getElementById('location-content').innerHTML=html;
+  return h + '</tbody></table></div><p class="note">Cells show open appointment slots. Gray dot = no submission for that week.</p></div>';
 }
-
-// ── HEATMAP VIEW ───────────────────────────────────────────────────────────
-function renderHeatmap(){
-  var data = filteredData();
-  // rows = providers, cols = week+day combos
-  var colKeys=[];
-  var seenCols={};
-  data.forEach(function(r){
-    var k=r.week+'|'+r.day;
-    if(!seenCols[k]){seenCols[k]=true;colKeys.push({week:r.week,day:r.day,di:r.di});}
-  });
-  colKeys.sort(function(a,b){return a.week.localeCompare(b.week)||a.di-b.di;});
-
-  // group data by prov+week+day
-  var lookup={};
-  data.forEach(function(r){lookup[r.provider+'|'+r.week+'|'+r.day]=r;});
-
-  var html='<table class="heatmap-table"><thead><tr><th>Provider</th>';
-  colKeys.forEach(function(c){
-    var wlbl=new Date(c.week+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
-    html+='<th style="min-width:58px">'+c.day.slice(0,3)+'<br><span style="font-weight:400;font-size:0.6rem">'+wlbl+'</span></th>';
-  });
-  html+='</tr></thead><tbody>';
-
-  PROV_ORDER.forEach(function(prov){
-    html+='<tr><td class="hm-row-lbl">'+prov+'</td>';
-    colKeys.forEach(function(c){
-      var r=lookup[prov+'|'+c.week+'|'+c.day];
-      if(!r){html+='<td class="hm-none">—</td>';return;}
-      if(r.pto){html+='<td class="hm-pto">PTO</td>';return;}
-      if(r.no_sched && !r.loc_am){html+='<td class="hm-none">—</td>';return;}
-      var avail=r.slots.filter(function(s){return s==='available';}).length;
-      var filled=r.slots.filter(function(s){return s==='filled';}).length;
-      var cls = avail===0&&filled===0?'hm-none':avail===0?'hm-full':avail<=1?'hm-1':avail<=2?'hm-2':avail<=3?'hm-3':avail<=4?'hm-4':'hm-5p';
-      var lbl = avail===0&&filled===0?'—':avail===0?'Full':avail;
-      html+='<td class="'+cls+'" onmouseenter="showTip(event,\''+prov+'\',\''+c.day+'\',new Date(\''+c.week+'T12:00:00\').toLocaleDateString(\'en-US\',{month:\'short\',day:\'numeric\'}),'+JSON.stringify(r.slots)+')" onmouseleave="hideTip()">'+lbl+'</td>';
-    });
-    html+='</tr>';
-  });
-  html+='</tbody></table>';
-  html+='<div class="legend" style="margin-top:12px;padding-left:2px;">';
-  html+='<div class="leg"><div class="leg-sq hm-full" style="width:20px;height:12px;border-radius:3px;background:#dcfce7;border:1px solid #e2e8f0"></div>Fully Booked</div>';
-  html+='<div class="leg"><div class="leg-sq" style="background:#fef9c3;border:1px solid #e2e8f0;width:20px;height:12px;border-radius:3px"></div>1–2 Open</div>';
-  html+='<div class="leg"><div class="leg-sq" style="background:#fde68a;border:1px solid #e2e8f0;width:20px;height:12px;border-radius:3px"></div>3–4 Open</div>';
-  html+='<div class="leg"><div class="leg-sq" style="background:#f59e0b;width:20px;height:12px;border-radius:3px"></div>5+ Open</div>';
-  html+='<div class="leg"><div class="leg-sq hm-pto" style="width:20px;height:12px;border-radius:3px;background:#ede9fe"></div>PTO / Holiday / Traveling</div>';
-  html+='<div class="leg"><div class="leg-sq hm-none" style="width:20px;height:12px;border-radius:3px;background:#fee2e2"></div>No Schedule</div>';
-  html+='</div>';
-  document.getElementById('heatmap-content').innerHTML=html;
+function render(){
+  const recs = filtered();
+  header(recs);
+  $('legend').innerHTML = st.view==='heat' ? LEG_H : LEG;
+  let html = st.view==='prov' ? renderProv(recs) : st.view==='loc' ? renderLoc(recs) : renderHeat(recs);
+  if (!html) html = monthRecs().length
+    ? '<div class="empty">No schedules match these filters.</div>'
+    : `<div class="empty">No tracker submissions for ${esc(mLabel(st.month))} yet. Pick a past month from the dropdown.</div>`;
+  $('view').innerHTML = html;
 }
-
-// ── TOOLTIP ────────────────────────────────────────────────────────────────
-function showTip(e, prov, day, wklbl, slots){
-  var t=document.getElementById('tip');
-  var avail=slots.filter(function(s){return s==='available';}).length;
-  var filled=slots.filter(function(s){return s==='filled';}).length;
-  var html='<b>'+prov+'</b> · '+day+' (Wk '+wklbl+')<br>';
-  html+='<span style="opacity:0.75">'+(ROLES[prov]||'')+'</span><br>';
-  html+='✅ '+filled+' filled &nbsp; 🟡 '+avail+' available<br>';
-  html+='<div style="display:flex;gap:3px;margin-top:5px;">';
-  slots.forEach(function(s,i){
-    html+='<div style="text-align:center"><div style="width:18px;height:18px;border-radius:3px;background:'+slotColor(s)+'"></div><div style="font-size:0.5rem;color:rgba(255,255,255,0.6);margin-top:1px">'+SLOT_TIMES[i].split('–')[0]+'</div></div>';
-  });
-  html+='</div>';
-  t.innerHTML=html; t.style.display='block';
-}
-function hideTip(){document.getElementById('tip').style.display='none';}
-document.addEventListener('mousemove',function(e){
-  var t=document.getElementById('tip');
-  if(t.style.display!=='none'){t.style.left=(e.clientX+14)+'px';t.style.top=(e.clientY-8)+'px';}
+document.querySelectorAll('nav.tabs button').forEach(b => b.onclick = () => {
+  st.view = b.dataset.v;
+  document.querySelectorAll('nav.tabs button').forEach(x => x.setAttribute('aria-selected', x===b));
+  render();
 });
-
-// ── TAB SWITCH ─────────────────────────────────────────────────────────────
-function showTab(t,el){
-  ['provider','location','heatmap'].forEach(function(id){
-    document.getElementById('tab-'+id).classList.toggle('hidden',id!==t);
-  });
-  document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active');});
-  el.classList.add('active');
-  if(t==='location') renderLocation();
-  if(t==='heatmap')  renderHeatmap();
-}
+$('curBtn').onclick = () => { st.month = CUR; st.week='all'; setupWeeks(); render(); };
+$('pastSel').onchange = e => { if (e.target.value){ st.month = e.target.value; st.week='all'; setupWeeks(); render(); } };
+$('weekSel').onchange = e => { st.week = e.target.value; render(); };
+$('provSel').onchange = e => { st.prov = e.target.value; render(); };
+$('q').oninput = e => { st.q = e.target.value; render(); };
+setupMonths(); setupWeeks(); render();
 </script>
-</body>
-</html>
+
+</body></html>
